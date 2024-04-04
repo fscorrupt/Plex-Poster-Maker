@@ -5,7 +5,8 @@
     "FanartTvAPIKey": "FANARTAPIKEY",
     "PlexToken": "",
     "FavProvider": "tmdb",
-    "PreferredLanguageOrder": ["xx", "en", "de"]
+    "PreferredLanguageOrder": ["xx", "en", "de"],
+    "TautulliTrigger": "false"
   },
   "PlexPart":{
     "LibstoExclude": ["Youtube", "Audiobooks", "Kids Audiobooks", "Tech Trainings"],
