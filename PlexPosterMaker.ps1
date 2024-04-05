@@ -159,7 +159,7 @@ function SendMessage {
             },
             {
                 "name": "Truncated",
-                "value": ""$truncated"",
+                "value": "$truncated",
                 "inline": true
             },
             {
@@ -248,7 +248,7 @@ function SendMessage {
             },
             {
                 "name": "Truncated",
-                "value": ""$truncated"",
+                "value": "$truncated",
                 "inline": true
             },
             {
@@ -4457,7 +4457,7 @@ Elseif ($Tautulli) {
 
                                     # Export the array to a CSV file
                                     $movietemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                    SendMessage -type $movietemp.Type -title $movietemp.Title -Lib $movietemp.LibraryName -DLSource $movietemp.'Download Source' -lang $movietemp.Language -favurl $movietemp.'Fav Provider Link' -fallback $movietemp.Fallback -Truncated $movietemp.TextTruncated
+                                    SendMessage -type $movietemp.Type -title $movietemp.Title.replace('"', '""') -Lib $movietemp.LibraryName -DLSource $movietemp.'Download Source' -lang $movietemp.Language -favurl $movietemp.'Fav Provider Link' -fallback $movietemp.Fallback -Truncated $movietemp.TextTruncated
                                 }
                             }
                         }
@@ -4743,7 +4743,7 @@ Elseif ($Tautulli) {
                                     }
                                     # Export the array to a CSV file
                                     $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                    SendMessage -type $moviebackgroundtemp.Type -title $moviebackgroundtemp.Title -Lib $moviebackgroundtemp.LibraryName -DLSource $moviebackgroundtemp.'Download Source' -lang $moviebackgroundtemp.Language -favurl $moviebackgroundtemp.'Fav Provider Link' -fallback $moviebackgroundtemp.Fallback -Truncated $moviebackgroundtemp.TextTruncated
+                                    SendMessage -type $moviebackgroundtemp.Type -title $moviebackgroundtemp.Title.replace('"', '""') -Lib $moviebackgroundtemp.LibraryName -DLSource $moviebackgroundtemp.'Download Source' -lang $moviebackgroundtemp.Language -favurl $moviebackgroundtemp.'Fav Provider Link' -fallback $moviebackgroundtemp.Fallback -Truncated $moviebackgroundtemp.TextTruncated
                                 }
                             }
                         }
@@ -5114,7 +5114,7 @@ Elseif ($Tautulli) {
                                 }
                                 # Export the array to a CSV file
                                 $showtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                SendMessage -type $showtemp.Type -title $showtemp.Title -Lib $showtemp.LibraryName -DLSource $showtemp.'Download Source' -lang $showtemp.Language -favurl $showtemp.'Fav Provider Link' -fallback $showtemp.Fallback -Truncated $showtemp.TextTruncated
+                                SendMessage -type $showtemp.Type -title $showtemp.Title.replace('"', '""') -Lib $showtemp.LibraryName -DLSource $showtemp.'Download Source' -lang $showtemp.Language -favurl $showtemp.'Fav Provider Link' -fallback $showtemp.Fallback -Truncated $showtemp.TextTruncated
                             }
                         }
                     }
@@ -5408,7 +5408,7 @@ Elseif ($Tautulli) {
                                 }
                                 # Export the array to a CSV file
                                 $showbackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                SendMessage -type $showbackgroundtemp.Type -title $showbackgroundtemp.Title -Lib $showbackgroundtemp.LibraryName -DLSource $showbackgroundtemp.'Download Source' -lang $showbackgroundtemp.Language -favurl $showbackgroundtemp.'Fav Provider Link' -fallback $showbackgroundtemp.Fallback -Truncated $showbackgroundtemp.TextTruncated
+                                SendMessage -type $showbackgroundtemp.Type -title $showbackgroundtemp.Title.replace('"', '""') -Lib $showbackgroundtemp.LibraryName -DLSource $showbackgroundtemp.'Download Source' -lang $showbackgroundtemp.Language -favurl $showbackgroundtemp.'Fav Provider Link' -fallback $showbackgroundtemp.Fallback -Truncated $showbackgroundtemp.TextTruncated
 
                             }
                         }
@@ -5782,7 +5782,7 @@ Elseif ($Tautulli) {
                                     }
                                     # Export the array to a CSV file
                                     $seasontemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                    SendMessage -type $seasontemp.Type -title $seasontemp.Title -Lib $seasontemp.LibraryName -DLSource $seasontemp.'Download Source' -lang $seasontemp.Language -favurl $seasontemp.'Fav Provider Link' -fallback $seasontemp.Fallback -Truncated $seasontemp.TextTruncated
+                                    SendMessage -type $seasontemp.Type -title $seasontemp.Title.replace('"', '""') -Lib $seasontemp.LibraryName -DLSource $seasontemp.'Download Source' -lang $seasontemp.Language -favurl $seasontemp.'Fav Provider Link' -fallback $seasontemp.Fallback -Truncated $seasontemp.TextTruncated
                                 }
                             }
                         }
@@ -6206,7 +6206,7 @@ Elseif ($Tautulli) {
                                                 }
                                                 # Export the array to a CSV file
                                                 $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                                SendMessage -type $episodetemp.Type -title $($global:show_name +"|"+ $episodetemp.Title) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
+                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '""') +"|"+ $episodetemp.Title.replace('"', '""')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
                                     }
@@ -6628,7 +6628,7 @@ Elseif ($Tautulli) {
                                                 }
                                                 # Export the array to a CSV file
                                                 $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                                SendMessage -type $episodetemp.Type -title $($global:show_name +"|"+ $episodetemp.Title) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
+                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '""') +"|"+ $episodetemp.Title.replace('"', '""')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
                                     }
