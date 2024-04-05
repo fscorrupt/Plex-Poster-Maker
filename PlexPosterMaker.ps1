@@ -3743,20 +3743,20 @@ Elseif ($Tautulli) {
         $Seasondata = $null
         if ($PlexToken) {
             if ($contentquery -eq 'Directory') {
-                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
-                [xml]$Seasondata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey/children?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
+                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey)?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
+                [xml]$Seasondata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey)/children?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
             }
             Else {
-                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
+                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey)?X-Plex-Token=$PlexToken -Headers $extraPlexHeaders).content
             }
         }
         Else {
             if ($contentquery -eq 'Directory') {
-                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey -Headers $extraPlexHeaders).content
-                [xml]$Seasondata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey/children? -Headers $extraPlexHeaders).content
+                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey) -Headers $extraPlexHeaders).content
+                [xml]$Seasondata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey)/children? -Headers $extraPlexHeaders).content
             }
             Else {
-                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$queryKey -Headers $extraPlexHeaders).content
+                [xml]$Metadata = (Invoke-WebRequest $PlexUrl/library/metadata/$($queryKey) -Headers $extraPlexHeaders).content
             }
         }
 
