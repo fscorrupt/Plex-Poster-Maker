@@ -4456,7 +4456,7 @@ Elseif ($Tautulli) {
                                     }
 
                                     # Export the array to a CSV file
-                                    $movietemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                    $movietemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                     SendMessage -type $movietemp.Type -title $movietemp.Title.replace('"', '\"') -Lib $movietemp.LibraryName -DLSource $movietemp.'Download Source' -lang $movietemp.Language -favurl $movietemp.'Fav Provider Link' -fallback $movietemp.Fallback -Truncated $movietemp.TextTruncated
                                 }
                             }
@@ -4483,7 +4483,7 @@ Elseif ($Tautulli) {
                                 }
                             
                                 # Export the array to a CSV file
-                                $movietemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                $movietemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                             }
                             $errorCount++
                         }
@@ -4742,7 +4742,7 @@ Elseif ($Tautulli) {
                                         Default { $moviebackgroundtemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                     }
                                     # Export the array to a CSV file
-                                    $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                    $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                     SendMessage -type $moviebackgroundtemp.Type -title $moviebackgroundtemp.Title.replace('"', '\"') -Lib $moviebackgroundtemp.LibraryName -DLSource $moviebackgroundtemp.'Download Source' -lang $moviebackgroundtemp.Language -favurl $moviebackgroundtemp.'Fav Provider Link' -fallback $moviebackgroundtemp.Fallback -Truncated $moviebackgroundtemp.TextTruncated
                                 }
                             }
@@ -4769,7 +4769,7 @@ Elseif ($Tautulli) {
                                 }
                             
                                 # Export the array to a CSV file
-                                $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                             }
                             $errorCount++
                         }
@@ -4810,7 +4810,7 @@ Elseif ($Tautulli) {
                 }
             
                 # Export the array to a CSV file
-                $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                $moviebackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
             }
             $errorCount++
         }
@@ -5113,7 +5113,7 @@ Elseif ($Tautulli) {
                                     Default { $showtemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                 }
                                 # Export the array to a CSV file
-                                $showtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                $showtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                 SendMessage -type $showtemp.Type -title $showtemp.Title.replace('"', '\"') -Lib $showtemp.LibraryName -DLSource $showtemp.'Download Source' -lang $showtemp.Language -favurl $showtemp.'Fav Provider Link' -fallback $showtemp.Fallback -Truncated $showtemp.TextTruncated
                             }
                         }
@@ -5140,7 +5140,7 @@ Elseif ($Tautulli) {
                             }
                         
                             # Export the array to a CSV file
-                            $showtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                            $showtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                         }
                         $errorCount++
                     }
@@ -5407,7 +5407,7 @@ Elseif ($Tautulli) {
                                     Default { $showbackgroundtemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                 }
                                 # Export the array to a CSV file
-                                $showbackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                $showbackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                 SendMessage -type $showbackgroundtemp.Type -title $showbackgroundtemp.Title.replace('"', '\"') -Lib $showbackgroundtemp.LibraryName -DLSource $showbackgroundtemp.'Download Source' -lang $showbackgroundtemp.Language -favurl $showbackgroundtemp.'Fav Provider Link' -fallback $showbackgroundtemp.Fallback -Truncated $showbackgroundtemp.TextTruncated
 
                             }
@@ -5435,7 +5435,7 @@ Elseif ($Tautulli) {
                             }
                         
                             # Export the array to a CSV file
-                            $showbackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                            $showbackgroundtemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                         }
                         $errorCount++
                     }
@@ -5781,7 +5781,7 @@ Elseif ($Tautulli) {
                                         Default { $seasontemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                     }
                                     # Export the array to a CSV file
-                                    $seasontemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                    $seasontemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                     SendMessage -type $seasontemp.Type -title $seasontemp.Title.replace('"', '\"') -Lib $seasontemp.LibraryName -DLSource $seasontemp.'Download Source' -lang $seasontemp.Language -favurl $seasontemp.'Fav Provider Link' -fallback $seasontemp.Fallback -Truncated $seasontemp.TextTruncated
                                 }
                             }
@@ -5808,7 +5808,7 @@ Elseif ($Tautulli) {
                                 }
                             
                                 # Export the array to a CSV file
-                                $seasontemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                $seasontemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                             }
                             $errorCount++
                         }
@@ -6205,7 +6205,7 @@ Elseif ($Tautulli) {
                                                     Default { $episodetemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                                 }
                                                 # Export the array to a CSV file
-                                                $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                                $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                                 SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') +"|"+ $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
@@ -6231,7 +6231,7 @@ Elseif ($Tautulli) {
                                             }
                                         
                                             # Export the array to a CSV file
-                                            $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                            $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                         }
                                         $errorCount++
                                     }
@@ -6627,7 +6627,7 @@ Elseif ($Tautulli) {
                                                     Default { $episodetemp | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value "N/A" }
                                                 }
                                                 # Export the array to a CSV file
-                                                $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                                $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                                 SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') +"|"+ $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
@@ -6653,7 +6653,7 @@ Elseif ($Tautulli) {
                                             }
                                         
                                             # Export the array to a CSV file
-                                            $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+                                            $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
                                         }
                                         $errorCount++
                                     }
@@ -6689,16 +6689,16 @@ Elseif ($Tautulli) {
     if ($posterCount -ge '1') {
         Write-Entry -Message "Show/Movie Posters created: $($posterCount-$SeasonCount-$BackgroundCount-$EpisodeCount)| Season images created: $SeasonCount | Background images created: $BackgroundCount | TitleCards created: $EpisodeCount" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
     }
-    if ((Test-Path $global:ScriptRoot\Logs\RecentlyAdded.csv)) {
-        Write-Entry -Message "You can find a detailed Summary of image Choices here: $global:ScriptRoot\Logs\RecentlyAdded.csv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+    if ((Test-Path $global:ScriptRoot\Logs\ImageChoices.csv)) {
+        Write-Entry -Message "You can find a detailed Summary of image Choices here: $global:ScriptRoot\Logs\ImageChoices.csv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
         # Calculate Summary
-        $SummaryCount = Import-Csv -LiteralPath "$global:ScriptRoot\Logs\RecentlyAdded.csv" -Delimiter ';'
+        $SummaryCount = Import-Csv -LiteralPath "$global:ScriptRoot\Logs\ImageChoices.csv" -Delimiter ';'
         $FallbackCount = @($SummaryCount | Where-Object Fallback -eq 'True')
         $TextlessCount = @($SummaryCount | Where-Object Language -eq 'Textless')
         $TextTruncatedCount = @($SummaryCount | Where-Object TextTruncated -eq 'True')
         $TextCount = @($SummaryCount | Where-Object Textless -eq 'False')
         if ($TextlessCount -or $FallbackCount -or $TextCount -or $PosterUnknownCount -or $TextTruncatedCount) {
-            Write-Entry -Message "This is a subset summary of all image choices from the RecentlyAdded.csv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
+            Write-Entry -Message "This is a subset summary of all image choices from the ImageChoices.csv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
         }
         if ($TextlessCount) {
             Write-Entry -Subtext "'$($TextlessCount.count)' times the script took a Textless image" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
@@ -6720,7 +6720,7 @@ Elseif ($Tautulli) {
     if ($errorCount -ge '1') {
         Write-Entry -Message "During execution '$errorCount' Errors occurred, please check the log for a detailed description where you see [ERROR-HERE]." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
     }
-    if (!(Get-ChildItem -LiteralPath "$global:ScriptRoot\Logs\RecentlyAdded.csv" -ErrorAction SilentlyContinue)) {
+    if (!(Get-ChildItem -LiteralPath "$global:ScriptRoot\Logs\ImageChoices.csv" -ErrorAction SilentlyContinue)) {
         $ImageChoicesDummycsv = New-Object psobject
 
         # Add members to the object with empty values
@@ -6735,8 +6735,8 @@ Elseif ($Tautulli) {
         $ImageChoicesDummycsv | Add-Member -MemberType NoteProperty -Name "Download Source" -Value $null
         $ImageChoicesDummycsv | Add-Member -MemberType NoteProperty -Name "Fav Provider Link" -Value $null
 
-        $ImageChoicesDummycsv | Select-Object * | Export-Csv -Path "$global:ScriptRoot\Logs\RecentlyAdded.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-        Write-Entry -Message "No RecentlyAdded.csv found, creating dummy file for you..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+        $ImageChoicesDummycsv | Select-Object * | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
+        Write-Entry -Message "No ImageChoices.csv found, creating dummy file for you..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
     }
     Write-Entry -Message "Script execution time: $FormattedTimespawn" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
 }
