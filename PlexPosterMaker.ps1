@@ -3886,7 +3886,7 @@ Elseif ($Tautulli) {
     $AllMovies = $Libraries | Where-Object { $_.'Library Type' -eq 'movie' }
 
     if ($global:TitleCards -eq 'True') {
-        Write-Entry -Message "Query episodes data from all Libs, this can take a while..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+        Write-Entry -Message "Query episodes data..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
         # Query episode info
         $Episodedata = @()
         foreach ($showentry in $AllShows) {
@@ -3912,6 +3912,7 @@ Elseif ($Tautulli) {
                 $tempseasondata | Add-Member -MemberType NoteProperty -Name "Season Number" -Value $Seasondata.MediaContainer.parentIndex
                 $tempseasondata | Add-Member -MemberType NoteProperty -Name "Episodes" -Value $($Seasondata.MediaContainer.video.index -join ',')
                 $tempseasondata | Add-Member -MemberType NoteProperty -Name "Title" -Value $($Seasondata.MediaContainer.video.title -join ';')
+                $tempseasondata | Add-Member -MemberType NoteProperty -Name "RatingKeys" -Value $($Seasondata.MediaContainer.video.ratingKey -join ',')
                 $tempseasondata | Add-Member -MemberType NoteProperty -Name "PlexTitleCardUrls" -Value $($Seasondata.MediaContainer.video.thumb -join ',')
                 $Episodedata += $tempseasondata
                 Write-Entry -Subtext "Found [$($tempseasondata.{Show Name})] of type $($tempseasondata.Type) for season $($tempseasondata.{Season Number})" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
@@ -3922,6 +3923,7 @@ Elseif ($Tautulli) {
             Write-Entry -Subtext "Found '$($Episodedata.Episodes.split(',').count)' Episodes..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
         }
     }
+
     # Test if csv´s are missing and create dummy file.
     if (!(Get-ChildItem -LiteralPath "$global:ScriptRoot\Logs\PlexEpisodeExport.csv" -ErrorAction SilentlyContinue)) {
         $EpisodeDummycsv = New-Object psobject
@@ -4238,11 +4240,11 @@ Elseif ($Tautulli) {
                                         try {
                                             Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                             $fileContent = [System.IO.File]::ReadAllBytes($PosterImage)
-                                            if ($PlexToken){
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                            if ($PlexToken) {
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                             Else {
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                         }
                                         catch {
@@ -4523,11 +4525,11 @@ Elseif ($Tautulli) {
                                         try {
                                             Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                             $fileContent = [System.IO.File]::ReadAllBytes($backgroundImage)
-                                            if ($PlexToken){
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                            if ($PlexToken) {
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                             Else {
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                         }
                                         catch {
@@ -4894,11 +4896,11 @@ Elseif ($Tautulli) {
                                     try {
                                         Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                         $fileContent = [System.IO.File]::ReadAllBytes($PosterImage)
-                                        if ($PlexToken){
-                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                        if ($PlexToken) {
+                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                         }
                                         Else {
-                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                         }
                                     }
                                     catch {
@@ -5186,11 +5188,11 @@ Elseif ($Tautulli) {
                                     try {
                                         Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                         $fileContent = [System.IO.File]::ReadAllBytes($backgroundImage)
-                                        if ($PlexToken){
-                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                        if ($PlexToken) {
+                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                         }
                                         Else {
-                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/arts?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                         }
                                     }
                                     catch {
@@ -5276,6 +5278,7 @@ Elseif ($Tautulli) {
                 $global:ImageMagickError = $null
                 $global:TextlessPoster = $null
                 $global:seasonNames = $entry.SeasonNames -split ','
+                $global:SeasonRatingKeys = $entry.SeasonRatingKeys -split ','
                 $global:seasonNumbers = $entry.seasonNumbers -split ','
                 $global:PlexSeasonUrls = $entry.PlexSeasonUrls -split ','
                 for ($i = 0; $i -lt $global:seasonNames.Count; $i++) {
@@ -5299,6 +5302,7 @@ Elseif ($Tautulli) {
                         $global:seasonTitle = $global:seasonNames[$i]
                     }
                     $global:SeasonNumber = $global:seasonNumbers[$i]
+                    $global:SeasonRatingKey = $global:SeasonRatingKeys[$i]
                     $global:PlexSeasonUrl = $global:PlexSeasonUrls[$i]
                     $global:season = "Season" + $global:SeasonNumber.PadLeft(2, '0')
 
@@ -5557,11 +5561,11 @@ Elseif ($Tautulli) {
                                         try {
                                             Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                             $fileContent = [System.IO.File]::ReadAllBytes($SeasonImage)
-                                            if ($PlexToken){
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                            if ($PlexToken) {
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:SeasonRatingKey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                             Else {
-                                                Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:SeasonRatingKey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                             }
                                         }
                                         catch {
@@ -5665,6 +5669,7 @@ Elseif ($Tautulli) {
                         $global:show_name = $episode."Show Name"
                         $global:season_number = $episode."Season Number"
                         $global:episode_numbers = $episode."Episodes".Split(",")
+                        $global:episode_ratingkeys = $episode."ratingKeys".Split(",")
                         $global:titles = $episode."Title".Split(";")
                         $global:PlexTitleCardUrls = $episode."PlexTitleCardUrls".Split(",")
                         if ($UseBackgroundAsTitleCard -eq 'True') {
@@ -5688,6 +5693,7 @@ Elseif ($Tautulli) {
                                 $magickcommand = $null
                                 $Arturl = $null
                                 $global:PlexTitleCardUrl = $entry.PlexBackgroundUrl
+                                $global:episode_ratingkey = $($global:episode_ratingkeys[$i].Trim())
                                 $global:EPTitle = $($global:titles[$i].Trim())
                                 $global:episodenumber = $($global:episode_numbers[$i].Trim())
                                 $global:FileNaming = "S" + $global:season_number.PadLeft(2, '0') + "E" + $global:episodenumber.PadLeft(2, '0')
@@ -5978,11 +5984,11 @@ Elseif ($Tautulli) {
                                                     try {
                                                         Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                                         $fileContent = [System.IO.File]::ReadAllBytes($EpisodeImage)
-                                                        if ($PlexToken){
-                                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                        if ($PlexToken) {
+                                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:episode_ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                                         }
                                                         Else {
-                                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:episode_ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                                         }
                                                     }
                                                     catch {
@@ -6079,6 +6085,7 @@ Elseif ($Tautulli) {
                                 $magickcommand = $null
                                 $Arturl = $null
                                 $global:PlexTitleCardUrl = $($global:PlexTitleCardUrls[$i].Trim())
+                                $global:episode_ratingkey = $($global:episode_ratingkeys[$i].Trim())
                                 $global:EPTitle = $($global:titles[$i].Trim())
                                 $global:episodenumber = $($global:episode_numbers[$i].Trim())
                                 $global:FileNaming = "S" + $global:season_number.PadLeft(2, '0') + "E" + $global:episodenumber.PadLeft(2, '0')
@@ -6397,11 +6404,11 @@ Elseif ($Tautulli) {
                                                     try {
                                                         Write-Entry -Subtext "Uploading Artwork to Plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color DarkMagenta -log Info
                                                         $fileContent = [System.IO.File]::ReadAllBytes($EpisodeImage)
-                                                        if ($PlexToken){
-                                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                        if ($PlexToken) {
+                                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:episode_ratingkey)/posters?X-Plex-Token=$PlexToken" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                                         }
                                                         Else {
-                                                            Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($entry.ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
+                                                            $Upload = Invoke-WebRequest -Uri "$PlexUrl/library/metadata/$($global:episode_ratingkey)/posters?" -Method Post -Headers $extraPlexHeaders -Body $fileContent -ContentType 'application/octet-stream'
                                                         }
                                                     }
                                                     catch {
