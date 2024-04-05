@@ -133,7 +133,7 @@ function SendMessage {
             "name": "PPM @Github",
             "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
             },
-            "description": "TAUTULLI Recently Added\n",
+            "description": "Recently Added\n\n",
             "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
             "color": $(if ($errorCount -ge '1') {16711680}Elseif ($global:IsFallback -eq 'True' -or $global:IsTruncated -eq 'True'){15120384}Else{5763719}),
             "fields": [
@@ -222,7 +222,7 @@ function SendMessage {
             "name": "PPM @Github",
             "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
             },
-            "description": "TAUTULLI Recently Added\n",
+            "description": "Recently Added\n\n",
             "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
             "color": $(if ($errorCount -ge '1') {16711680}Elseif ($global:IsFallback -eq 'True' -or $global:IsTruncated -eq 'True'){15120384}Else{5763719}),
             "fields": [
