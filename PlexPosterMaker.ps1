@@ -3728,7 +3728,6 @@ Elseif ($Tautulli) {
     # {rating_key}	The unique identifier for the movie, episode, or track.
     # {parent_rating_key}	The unique identifier for the season or album.
     # {grandparent_rating_key}	The unique identifier for the TV show or artist.
-    # Define the PosterMixin class
 
     $Libraries = @()
     if ($RatingKey -and $mediatype) {
