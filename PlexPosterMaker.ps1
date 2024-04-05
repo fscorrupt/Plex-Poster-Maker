@@ -24,7 +24,7 @@ $ProgressPreference = 'SilentlyContinue'
 function Set-OSTypeAndScriptRoot {
     if ($env:POWERSHELL_DISTRIBUTION_CHANNEL -like 'PSDocker-Alpine*') {
         $global:OSType = "DockerAlpine"
-        $global:ScriptRoot = $PSScriptRoot
+        $global:ScriptRoot = "./config"
     }
     Else {
         $global:ScriptRoot = $PSScriptRoot
