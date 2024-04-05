@@ -6567,9 +6567,9 @@ Elseif ($Tautulli) {
                 "name": "PPM @Github",
                 "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
                 },
-                "description": "TAUTULLI Recently Added\nPPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
+                "description": "TAUTULLI Recently Added\n\nPPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
                 "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
-                "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($Tautulli){15048717}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
+                "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                 "fields": [
                 {
                     "name": "",
@@ -6665,9 +6665,9 @@ Elseif ($Tautulli) {
                 "name": "PPM @Github",
                 "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
                 },
-                "description": "TAUTULLI Recently Added\nPPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
+                "description": "TAUTULLI Recently Added\n\nPPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
                 "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
-                "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($Tautulli){15048717}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
+                "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                 "fields": [
                 {
                     "name": "",
