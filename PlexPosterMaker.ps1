@@ -3885,7 +3885,7 @@ Elseif ($Tautulli) {
     $AllShows = $Libraries | Where-Object { $_.'Library Type' -eq 'show' }
     $AllMovies = $Libraries | Where-Object { $_.'Library Type' -eq 'movie' }
 
-    if ($global:TitleCards -eq 'True') {
+    if ($global:TitleCards -eq 'True' -and $mediatype -ne 'movie') {
         Write-Entry -Message "Query episodes data..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
         # Query episode info
         $Episodedata = @()
