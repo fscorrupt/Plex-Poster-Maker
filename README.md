@@ -1,9 +1,9 @@
-# Plex Poster Maker
+# Posterizarr
 
 This PowerShell script automates the process of generating images for your Plex media library. Leveraging information from your Plex library, such as movie or show titles, season and episode data, it fetches relevant artwork from Fanart.tv, TMDB, TVDB, Plex and IMDB. The script is able to focus on artwork with specific languages to grab. By default, textless artwork `xx` is retrieved and will fall back to `en` if textless is not found. This is a setting a user can decide on, either to focus on textless or on text posters. It also offers both automatic and manual modes for generating posters. The manual mode can accommodate custom creations that cannot be bulk retrieved.
 
 > [!NOTE]
-Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (Alpine v3.17) and on Windows operating systems.
+Posterizarr is cross-platform ready, meaning it can run on Linux, Docker (Alpine v3.17) and on Windows operating systems.
 > 
 > **Supported Poster Types:**
 >- Movie/Show Posters
@@ -25,7 +25,7 @@ Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (
 >[!TIP]
 > If you want to use the created assets with PMM make sure to check out the [Assets doc](https://metamanager.wiki/en/latest/pmm/guides/assets/)
 >
-> You can find an example config for the Assets on my [PMM-Configs repo](https://github.com/bullmoose20/Plex-Meta-Manager-Configs/blob/master/fscorrupt/config.yml)
+> You can find an example config for the Assets on my [PMM-Configs repo](https://github.com/meisnate12/Plex-Meta-Manager-Configs/blob/master/fscorrupt/config.yml)
 - **Resizing**: It automatically resizes every poster to 2000x3000.
 - **Overlays**: If you choose to, downloaded images will automatically have borders, text, and a gradient overlay applied.
   - Here are some gradient overlays that you can use instead of the default one [gradient-zip](gradient_background_poster_overlays.zip)
@@ -77,6 +77,7 @@ Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (
             -    `tvdb`      
             -    `plex`     
     - `PreferredLanguageOrder`: Specify language preferences. Default is `xx,en,de` (`xx` is Textless). Example configurations can be found in the config file. 2-digit language codes can be found here: [ISO 3166-1 Lang Codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+    - `PreferredSeasonLanguageOrder`: Specify language preferences for seasons. Default is `xx,en,de` (`xx` is Textless). Example configurations can be found in the config file. 2-digit language codes can be found here: [ISO 3166-1 Lang Codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
     </details>
     <details close>
     <summary>PlexPart:</summary>
@@ -100,6 +101,7 @@ Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (
     - `AssetPath`: Path to store generated posters.
     - `show_skipped`: If set to `true`, verbose logging of already created assets will be displayed; otherwise, they will be silently skipped - On large libraries, this may appear as if the script is hanging.
     - `magickinstalllocation`: Path to ImageMagick installation location where `magick.exe` is located (Otherwise leave value as `"./magick"`)
+      - The container handles this part on his own, you can leave it as it is in config.
     - `maxLogs`: Number of Log folders you want to keep in `RotatedLogs` Folder (Log History).
     - `logLevel`: Sets the verbosity of logging. 1 logs Warning/Error messages. Default is 2 which logs Info/Warning/Error messages. 3 captures Info/Warning/Error/Debug messages and is the most verbose.
     - `font`: Font file name.
@@ -214,7 +216,7 @@ Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (
     <br>
 
 3. Rename the config file to `config.json`.
-4. Place the `overlay.png`, or whatever file you defined earlier in `overlayfile`, and `Rocky.ttf` font, or whatever font you defined earlier in `font` files in the same directory as PosterMaker.ps1 which is `$ScriptRoot`.
+4. Place the `overlay.png`, or whatever file you defined earlier in `overlayfile`, and `Rocky.ttf` font, or whatever font you defined earlier in `font` files in the same directory as Posterizarr.ps1 which is `$ScriptRoot`.
 
 **Usage:**
 - **Automatic Mode**: Execute the script without any parameters to generate posters for your entire Plex library.
@@ -231,12 +233,79 @@ Plex Poster Maker is cross-platform ready, meaning it can run on Linux, Docker (
 Run the script without any parameters:
 
 ```powershell
-.\PlexPosterMaker.ps1
+.\Posterizarr.ps1
 ```
 
 This will generate posters for your entire Plex library based on the configured settings.
 
 The posters are all placed in `AssetPath\...`. This can then be mounted in Plex-Meta-Manager to use as the assets folder.
+
+### Tautulli Mode Docker
+> [!IMPORTANT]
+> Tautulli and Posterizarr must run as a container in Docker
+
+> [!Note]
+> If Discord is configured it will send a Notification on each trigger.
+
+In this mode we use Tautulli to trigger Posterizarr for an specific item in Plex, like a new show, movie or episode got added.
+
+To use it we need to configure a script in Tautulli, please follow these instructions.
+1. Make sure that you mount the `Posterizarr` directory to tautulli, cause the script needs the Path `/posterizarr`
+    ```yml
+    volumes:
+      - "/opt/appdata/posterizarr:/posterizarr:rw"
+    ```
+1. Download the [trigger.py](trigger.py) from the GH and place it in the Tautulli Script dir -> [Tautulli-Wiki](https://github.com/Tautulli/Tautulli/wiki/Custom-Scripts)
+1. Open Tautulli and go to Settings -> `NOTIFICATION AGENTS`
+1. Click on `Add a new notification agent` and select `Script`
+1. Specify the script folder where you placed the script and select the script file.
+    - You can specify a `Description` at the bottom like i did.
+    <details close>
+    <summary>🖼️Example</summary>
+    <br>
+    <p>
+      <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+        <img alt="testing" height="100%" src="/images/Tautulli_Step1.png">
+      </a>
+    </p>
+    </details>
+1. Go to `Triggers`, scroll down and select `Recently Added`.
+    <details close>
+    <summary>🖼️Example</summary>
+    <br>
+    <p>
+      <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+        <img alt="testing" height="100%" src="/images/Tautulli_Step2.png">
+      </a>
+    </p>
+    </details>
+1. Go to `Conditions`, you can now specify when the script should get called.
+    - In my case i specified the **Media Type**: `episode, movie, show and season`
+    - I also excluded the **Youtube** Lib cause the videos i have there - **do not** have an `tmdb,tvdb or fanart ID`.
+      - This is an recommended setting, either exclude such libs or include only those libs where Posterizarr should create art for.
+    <details close>
+    <summary>🖼️Example</summary>
+    <br>
+    <p>
+      <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+        <img alt="testing" height="100%" src="/images/Tautulli_Step3.png">
+      </a>
+    </p>
+    </details>
+1. Next go to Arguments -> Unfold `Recently Added` Menu and paste the following Argument, after that you can save it.
+    - **Please do not change the Argument otherwise the script could fail.**
+    ```sh
+    <movie>RatingKey "{rating_key}" mediatype "{media_type}"</movie><show>grandparentratingkey "{grandparent_rating_key}" mediatype "{media_type}"</show><season>parentratingkey "{parent_rating_key}" grandparentratingkey "{grandparent_rating_key}" mediatype "{media_type}"</season><episode>RatingKey "{rating_key}" parentratingkey "{parent_rating_key}" grandparentratingkey "{grandparent_rating_key}" mediatype "{media_type}"</episode>
+    ```
+    <details close>
+    <summary>🖼️Example</summary>
+    <br>
+    <p>
+      <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+        <img alt="testing" height="100%" src="/images/Tautulli_Step4.png">
+      </a>
+    </p>
+    </details>
 
 ### Testing Mode
 
@@ -246,14 +315,14 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 >This is handy for testing your configuration before applying it en masse to the actual posters. You can see how and where the text would be applied, as well as the size of the textbox.
 
 ```powershell
-.\PlexPosterMaker.ps1 -Testing
+.\Posterizarr.ps1 -Testing
 ```
 
 ### Docker
 - [Docker-Compose Example File](docker-compose.yml)
   - Change `RUN_TIME` in yaml to your needs **- You need to use 24H Time Format**
     - The Script gets executed on the Times you specified
-    - Before starting the scheduled run it checks if another PPM process is running, if yes - the scheduled run will be skipped.
+    - Before starting the scheduled run it checks if another Posterizarr process is running, if yes - the scheduled run will be skipped.
   - Change `volume` and `network` to fit your environment (Make sure you have the same network as your plex container when you use local IP of plex)
   - Change `TimeZone` to yours, otherwise it will get scheduled to a different time you may want it to.
   - You may also have to change `PUID/PGID`
@@ -265,11 +334,11 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 
   **Automatic Mode:**
   ```sh
-  docker exec -it ppm pwsh PlexPosterMaker.ps1
+  docker exec -it posterizarr pwsh Posterizarr.ps1
   ```
   **Testing Mode:**
   ```sh
-  docker exec -it ppm pwsh PlexPosterMaker.ps1 -Testing
+  docker exec -it posterizarr pwsh Posterizarr.ps1 -Testing
   ```
 ### Images from Testing Mode
 
@@ -278,7 +347,7 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 <summary>🖼️Posters</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="testing" height="100%" src="/images/testing.png">
   </a>
 </p>
@@ -288,7 +357,7 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 <summary>🖼️Backgrounds</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="backgroundtesting" height="100%" src="/images/backgroundtesting.png">
   </a>
 </p>
@@ -298,7 +367,7 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 <summary>🖼️TitleCards</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="titlecardtesting" height="100%" src="/images/titlecardtesting.png">
   </a>
 </p>
@@ -315,13 +384,13 @@ Run the script with the `-Testing` flag. In this mode, the script will create pi
 Run the script with the `-Manual` switch:
 
 ```powershell
-.\PlexPosterMaker.ps1 -Manual
+.\Posterizarr.ps1 -Manual
 ```
 Follow the prompts to enter the source picture path, media folder name, and movie/show title to manually create a custom poster.
 
-### How to create the PPM.xlsm
+### How to create the Posterizarr.xlsm
 <details close>
-<summary>📝PPM Excel Creation using Module1.bas:</summary>
+<summary>📝Posterizarr Excel Creation using Module1.bas:</summary>
 <br>
 
 1. **Open Excel**: First, open Microsoft Excel on your computer. You can do this by clicking on the Excel icon in your applications menu or by searching for "Excel" in your computer's search bar and selecting it from the results.
@@ -351,13 +420,13 @@ Following these steps will allow you to import the `Module1.bas` file containing
 
 </details>
 
-### How to use the PPM.xlsm
+### How to use the Posterizarr.xlsm
 <details close>
-<summary>🎥PPM Excel:</summary>
+<summary>🎥Posterizarr Excel:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
-    <img alt="excel" height="100%" src="/images/PPM-xlsm.gif">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+    <img alt="excel" height="100%" src="/images/Posterizarr-xlsm.gif">
   </a>
 </p>
 
@@ -369,7 +438,7 @@ Following these steps will allow you to import the `Module1.bas` file containing
 <summary>🖼️Discord Webhook:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="webhook" height="100%" src="/images/webhookexample.png">
   </a>
 </p>
@@ -382,7 +451,7 @@ Following these steps will allow you to import the `Module1.bas` file containing
 <summary>🖼️Script folder:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="folder" height="100%" src="/images/folder.png">
   </a>
 </p>
@@ -393,7 +462,7 @@ Following these steps will allow you to import the `Module1.bas` file containing
 <summary>🖼️script output:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="output" height="100%" src="/images/output.png">
   </a>
 </p>
@@ -402,17 +471,17 @@ Following these steps will allow you to import the `Module1.bas` file containing
 <summary>🖼️ImageChoices.csv:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="imagecsv" height="100%" src="/images/imagecsv.png">
   </a>
 </p>
 </details>
 <details close>
-<summary>🖼️Assets after PPM run:</summary>
+<summary>🖼️Assets after Posterizarr run:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
-    <img alt="output" height="100%" src="/images/ppm-overview.png">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
+    <img alt="output" height="100%" src="/images/Posterizarr-overview.png">
   </a>
 </p>
 </details>
@@ -420,7 +489,7 @@ Following these steps will allow you to import the `Module1.bas` file containing
 <summary>🖼️Assets after PMM run:</summary>
 <br>
 <p>
-  <a href="https://github.com/fscorrupt/Plex-Poster-Maker" width="100%">
+  <a href="https://github.com/fscorrupt/Posterizarr" width="100%">
     <img alt="imagecsv" height="100%" src="/images/pmm-overview.png">
   </a>
 </p>
@@ -433,11 +502,9 @@ Feel free to customize the script further to meet your specific preferences or a
 ### PR Rules
 
 > [!IMPORTANT]
-> - Adjust on each PR the version number in script on Line 6 `$CurrentScriptVersion = "1.0.55"`
+> - Adjust on each PR the version number in script on Line 11 `$CurrentScriptVersion = "1.0.55"`
 > - Adjust the version number in [Release.txt](Release.txt) to match the one in script.
 >   - this is required because the script checks against this file if a newer version is available.
 > - Do not include images on a PR.
 
 ![versioning](/images/versioning.jpg)
-
-

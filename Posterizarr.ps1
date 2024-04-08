@@ -8,7 +8,7 @@ param (
     [string]$mediatype
 )
 
-$CurrentScriptVersion = "1.1.0"
+$CurrentScriptVersion = "1.1.7"
 $global:HeaderWritten = $false
 $ProgressPreference = 'SilentlyContinue'
 
@@ -63,17 +63,18 @@ function Write-Entry {
     # ASCII art header
     if (-not $global:HeaderWritten) {
         $Header = @"
-===============================================================================
-  ____  _             ____           _              __  __       _
- |  _ \| | _____  __ |  _ \ ___  ___| |_ ___ _ __  |  \/  | __ _| | _____ _ __
- | |_) | |/ _ \ \/ / | |_) / _ \/ __| __/ _ \ '__| | |\/| |/ _``` | |/ / _ \ '__|
- |  __/| |  __/>  <  |  __/ (_) \__ \ ||  __/ |    | |  | | (_| |   <  __/ |
- |_|   |_|\___/_/\_\ |_|   \___/|___/\__\___|_|    |_|  |_|\__,_|_|\_\___|_|
+============================================================
+  _____          _            __  __       _             
+ |  __ \        | |          |  \/  |     | |            
+ | |__) |__  ___| |_ ___ _ __| \  / | __ _| | _____ _ __ 
+ |  ___/ _ \/ __| __/ _ \ '__| |\/| |/ _``` | |/ / _ \ '__|
+ | |  | (_) \__ \ ||  __/ |  | |  | | (_| |   <  __/ |   
+ |_|   \___/|___/\__\___|_|  |_|  |_|\__,_|_|\_\___|_|   
 
  Current Version: $CurrentScriptVersion
  Latest Version: $LatestScriptVersion
  Platform: $Platform
-===============================================================================
+=============================================================
 "@
         Write-Host $Header
         $Header | Out-File $Path -Append
@@ -124,14 +125,14 @@ function SendMessage {
         if ($global:NotifyUrl -like '*discord*') {
             $jsonPayload = @"
     {
-        "username": "Plex-Poster-Maker",
-        "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+        "username": "Posterizarr",
+        "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
         "content": "",
         "embeds": [
         {
             "author": {
-            "name": "PPM @Github",
-            "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+            "name": "Posterizarr @Github",
+            "url": "https://github.com/fscorrupt/Posterizarr"
             },
             "description": "Recently Added\n\n",
             "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
@@ -202,10 +203,10 @@ function SendMessage {
         Else {
             if ($global:SendNotification -eq 'True') {
                 if ($errorCount -ge '1') {
-                    apprise --notification-type="error" --title="Plex-Poster-Maker" --body="PPM run took: $FormattedTimespawn`nIt Created '$posterCount' Images`n`nDuring execution '$errorCount' Errors occurred, please check log for detailed description." "$global:NotifyUrl"
+                    apprise --notification-type="error" --title="Posterizarr" --body="Run took: $FormattedTimespawn`nIt Created '$posterCount' Images`n`nDuring execution '$errorCount' Errors occurred, please check log for detailed description." "$global:NotifyUrl"
                 }
                 Else {
-                    apprise --notification-type="success" --title="Plex-Poster-Maker" --body="PPM run took: $FormattedTimespawn`nIt Created '$posterCount' Images" "$global:NotifyUrl"
+                    apprise --notification-type="success" --title="Posterizarr" --body="Run took: $FormattedTimespawn`nIt Created '$posterCount' Images" "$global:NotifyUrl"
                 }
             }
         }
@@ -213,14 +214,14 @@ function SendMessage {
     if ($global:NotifyUrl -and $env:POWERSHELL_DISTRIBUTION_CHANNEL -notlike 'PSDocker-Alpine*') {
         $jsonPayload = @"
     {
-        "username": "Plex-Poster-Maker",
-        "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+        "username": "Posterizarr",
+        "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
         "content": "",
         "embeds": [
         {
             "author": {
-            "name": "PPM @Github",
-            "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+            "name": "Posterizarr @Github",
+            "url": "https://github.com/fscorrupt/Posterizarr"
             },
             "description": "Recently Added\n\n",
             "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
@@ -338,6 +339,7 @@ function GetTMDBMoviePoster {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/posters"
             $errorCount++
         }
         if ($response) {
@@ -385,6 +387,7 @@ function GetTMDBMoviePoster {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/posters"
             $errorCount++
         }
         if ($response) {
@@ -411,7 +414,7 @@ function GetTMDBMoviePoster {
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/posters"
                         }
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
             }
@@ -431,6 +434,7 @@ function GetTMDBMovieBackground {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/backdrops"
             $errorCount++
         }
         if ($response) {
@@ -485,6 +489,7 @@ function GetTMDBMovieBackground {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/backdrops"
             $errorCount++
         }
         if ($response) {
@@ -511,7 +516,7 @@ function GetTMDBMovieBackground {
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/movie/$($global:tmdbid)/images/backdrops"
                         }
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
                 if (!$global:posterurl) {
@@ -542,6 +547,7 @@ function GetTMDBShowPoster {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/posters"
             $errorCount++
         }
         if ($response) {
@@ -590,6 +596,7 @@ function GetTMDBShowPoster {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/posters"
             $errorCount++
         }
         if ($response) {
@@ -616,7 +623,7 @@ function GetTMDBShowPoster {
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/posters"
                         }
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
             }
@@ -629,20 +636,22 @@ function GetTMDBShowPoster {
 }
 function GetTMDBSeasonPoster {
     Write-Entry -Subtext "Searching on TMDB for Season '$global:SeasonNumber' poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
-    if ($global:PreferTextless -eq 'True') {
+    if ($global:SeasonPreferTextless -eq 'True') {
         try {
             $response = (Invoke-WebRequest -Uri "https://api.themoviedb.org/3/tv/$($global:tmdbid)/season/$global:SeasonNumber/images?append_to_response=images&language=xx&include_image_language=en,null,de" -Method GET -Headers $global:headers -ErrorAction SilentlyContinue).content | ConvertFrom-Json -ErrorAction SilentlyContinue
         }
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
             $errorCount++
         }
         if ($response) {
             if ($response.posters) {
                 $NoLangPoster = ($response.posters | Where-Object iso_639_1 -eq $null)
+                Write-Entry -Subtext "NoLangPoster: $NoLangPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                 if (!$NoLangPoster) {
-                    if (!$global:OnlyTextless) {
+                    if (!$global:SeasonOnlyTextless) {
                         $posterpath = (($response.posters | Sort-Object vote_average -Descending)[0]).file_path
                         $global:posterurl = "https://image.tmdb.org/t/p/original$posterpath"
                         Write-Entry -Subtext "Found Poster with text on TMDB" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
@@ -650,6 +659,12 @@ function GetTMDBSeasonPoster {
                         $global:TMDBAssetTextLang = (($response.posters | Sort-Object vote_average -Descending)[0]).iso_639_1
                         $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
                         $global:TMDBSeasonFallback = $global:posterurl
+                        Write-Entry -Subtext "Posterpath: $posterpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterWithText: $global:PosterWithText" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBAssetTextLang: $global:TMDBAssetTextLang" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBAssetChangeUrl: $global:TMDBAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBSeasonFallback: $global:TMDBSeasonFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                         return $global:posterurl
                     }
                     Else {
@@ -664,6 +679,10 @@ function GetTMDBSeasonPoster {
                         Write-Entry -Subtext "Found Textless Poster on TMDB" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
                         $global:TextlessPoster = $true
                         $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
+                        Write-Entry -Subtext "Posterpath: $posterpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TextlessPoster: $global:TextlessPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBAssetChangeUrl: $global:TMDBAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                         return $global:posterurl
                     }
                 }
@@ -681,21 +700,22 @@ function GetTMDBSeasonPoster {
     Else {
         try {
             if ($global:SeasonNumber -match '\b\d{1,2}\b') {
-                $response = (Invoke-WebRequest -Uri "https://api.themoviedb.org/3/tv/$($global:tmdbid)/season/$global:SeasonNumber/images?append_to_response=images&language=$($global:PreferredLanguageOrder[0])&include_image_language=$($global:PreferredLanguageOrderTMDB -join ',')" -Method GET -Headers $global:headers -ErrorAction SilentlyContinue).content | ConvertFrom-Json -ErrorAction SilentlyContinue
+                $response = (Invoke-WebRequest -Uri "https://api.themoviedb.org/3/tv/$($global:tmdbid)/season/$global:SeasonNumber/images?append_to_response=images&language=$($global:PreferredSeasonLanguageOrder[0])&include_image_language=$($global:PreferredSeasonLanguageOrderTMDB -join ',')" -Method GET -Headers $global:headers -ErrorAction SilentlyContinue).content | ConvertFrom-Json -ErrorAction SilentlyContinue
             }
             Else {
-                $responseBackup = (Invoke-WebRequest -Uri "https://api.themoviedb.org/3/tv/$($global:tmdbid)?append_to_response=images&language=$($PreferredLanguageOrder[0])&include_image_language=$($global:PreferredLanguageOrderTMDB -join ',')" -Method GET -Headers $global:headers -ErrorAction SilentlyContinue).content | ConvertFrom-Json -ErrorAction SilentlyContinue
+                $responseBackup = (Invoke-WebRequest -Uri "https://api.themoviedb.org/3/tv/$($global:tmdbid)?append_to_response=images&language=$($global:PreferredSeasonLanguageOrder[0])&include_image_language=$($global:PreferredSeasonLanguageOrderTMDB -join ',')" -Method GET -Headers $global:headers -ErrorAction SilentlyContinue).content | ConvertFrom-Json -ErrorAction SilentlyContinue
             }
         }
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
             $errorCount++
         }
         if ($responseBackup) {
             if ($responseBackup.images.posters) {
                 Write-Entry -Subtext "Could not get a result with '$global:SeasonNumber' on TMDB, likely season number not in correct format, fallback to Show poster." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                foreach ($lang in $global:PreferredLanguageOrderTMDB) {
+                foreach ($lang in $global:PreferredSeasonLanguageOrderTMDB) {
                     if ($lang -eq 'null') {
                         $FavPoster = ($responseBackup.images.posters | Where-Object iso_639_1 -eq $null)
                     }
@@ -716,15 +736,20 @@ function GetTMDBSeasonPoster {
                             $global:TMDBAssetTextLang = $lang
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
                         }
+                        Write-Entry -Subtext "Posterpath: $posterpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterWithText: $global:PosterWithText" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBAssetTextLang: $global:TMDBAssetTextLang" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TMDBAssetChangeUrl: $global:TMDBAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
             }
         }
         if ($response) {
             if ($response.posters) {
-                foreach ($lang in $global:PreferredLanguageOrderTMDB) {
+                foreach ($lang in $global:PreferredSeasonLanguageOrderTMDB) {
                     if ($lang -eq 'null') {
                         $FavPoster = ($response.posters | Where-Object iso_639_1 -eq $null)
                     }
@@ -746,7 +771,7 @@ function GetTMDBSeasonPoster {
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:SeasonNumber/images/posters"
                         }
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
             }
@@ -771,6 +796,7 @@ function GetTMDBShowBackground {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/backdrops"
             $errorCount++
         }
         if ($response) {
@@ -829,6 +855,7 @@ function GetTMDBShowBackground {
         catch {
             Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
             Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+            $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/backdrops"
             $errorCount++
         }
         if ($response) {
@@ -855,7 +882,7 @@ function GetTMDBShowBackground {
                             $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/images/backdrops"
                         }
                         return $global:posterurl
-                        break
+                        continue
                     }
                 }
                 if (!$global:posterurl) {
@@ -886,6 +913,7 @@ function GetTMDBTitleCard {
     catch {
         Write-Entry -Subtext "Could not query TMDB url, error message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
         Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
+        $global:TMDBAssetChangeUrl = "https://www.themoviedb.org/tv/$($global:tmdbid)/season/$global:season_number/episode/$global:episodenumber/images/backdrops"
         $errorCount++
     }
     if ($response) {
@@ -931,7 +959,7 @@ function GetFanartMoviePoster {
     $global:Fallback = $null
     Write-Entry -Subtext "Searching on Fanart.tv for a movie poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
     if ($global:PreferTextless -eq 'True') {
-        $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+        $ids = @($global:tmdbid, $global:imdbid)
         $entrytemp = $null
 
         foreach ($id in $ids) {
@@ -955,14 +983,14 @@ function GetFanartMoviePoster {
                             Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
                             $global:FANARTAssetChangeUrl = "https://fanart.tv/movie/$id"
                         }
-                        break
+                        continue
                     }
                     Else {
                         $global:posterurl = ($entrytemp.movieposter | Where-Object lang -eq '00')[0].url
                         Write-Entry -Subtext "Found Textless Poster on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
                         $global:TextlessPoster = $true
                         $global:FANARTAssetChangeUrl = "https://fanart.tv/movie/$id"
-                        break
+                        continue
                     }
                 }
             }
@@ -977,7 +1005,7 @@ function GetFanartMoviePoster {
         }
     }
     Else {
-        $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+        $ids = @($global:tmdbid, $global:imdbid)
         $entrytemp = $null
 
         foreach ($id in $ids) {
@@ -997,7 +1025,7 @@ function GetFanartMoviePoster {
                                 $global:PosterWithText = $true
                                 $global:FANARTAssetTextLang = $lang
                             }
-                            break
+                            continue
                         }
                     }
                 }
@@ -1016,7 +1044,7 @@ function GetFanartMoviePoster {
 function GetFanartMovieBackground {
     $global:Fallback = $null
     Write-Entry -Subtext "Searching on Fanart.tv for a Background poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
-    $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+    $ids = @($global:tmdbid, $global:imdbid)
     $entrytemp = $null
 
     foreach ($id in $ids) {
@@ -1034,14 +1062,14 @@ function GetFanartMovieBackground {
                         $global:Fallback = "TMDB"
                         $global:fanartfallbackposterurl = ($entrytemp.moviebackground)[0].url
                     }
-                    break
+                    continue
                 }
                 Else {
                     $global:posterurl = ($entrytemp.moviebackground | Where-Object lang -eq '')[0].url
                     Write-Entry -Subtext "Found Textless background on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
                     $global:TextlessPoster = $true
                     $global:FANARTAssetChangeUrl = "https://fanart.tv/movie/$id"
-                    break
+                    continue
                 }
             }
         }
@@ -1059,40 +1087,37 @@ function GetFanartShowPoster {
     $global:Fallback = $null
     Write-Entry -Subtext "Searching on Fanart.tv for a show poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
     if ($global:PreferTextless -eq 'True') {
-        $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+        $id = $global:tvdbid
         $entrytemp = $null
+        if ($id) {
+            $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
+            if ($entrytemp -and $entrytemp.tvposter) {
+                if (!($entrytemp.tvposter | Where-Object lang -eq '00')) {
+                    if (!$global:OnlyTextless) {
+                        $global:posterurl = ($entrytemp.tvposter)[0].url
 
-        foreach ($id in $ids) {
-            if ($id) {
-                $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
-                if ($entrytemp -and $entrytemp.tvposter) {
-                    if (!($entrytemp.tvposter | Where-Object lang -eq '00')) {
-                        if (!$global:OnlyTextless) {
-                            $global:posterurl = ($entrytemp.tvposter)[0].url
+                        Write-Entry -Subtext "Found Poster with text on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                        $global:PosterWithText = $true
+                        $global:FANARTAssetTextLang = ($entrytemp.tvposter)[0].lang
+                        $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
 
-                            Write-Entry -Subtext "Found Poster with text on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                            $global:PosterWithText = $true
-                            $global:FANARTAssetTextLang = ($entrytemp.tvposter)[0].lang
-                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-
-                            if ($global:FavProvider -eq 'FANART') {
-                                $global:Fallback = "TMDB"
-                                $global:fanartfallbackposterurl = ($entrytemp.tvposter)[0].url
-                            }
+                        if ($global:FavProvider -eq 'FANART') {
+                            $global:Fallback = "TMDB"
+                            $global:fanartfallbackposterurl = ($entrytemp.tvposter)[0].url
                         }
-                        Else {
-                            Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
-                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                        }
-                        break
                     }
                     Else {
-                        $global:posterurl = ($entrytemp.tvposter | Where-Object lang -eq '00')[0].url
-                        Write-Entry -Subtext "Found Textless Poster on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
-                        $global:TextlessPoster = $true
+                        Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
                         $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                        break
                     }
+                    continue
+                }
+                Else {
+                    $global:posterurl = ($entrytemp.tvposter | Where-Object lang -eq '00')[0].url
+                    Write-Entry -Subtext "Found Textless Poster on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
+                    $global:TextlessPoster = $true
+                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                    continue
                 }
             }
         }
@@ -1108,28 +1133,26 @@ function GetFanartShowPoster {
         }
     }
     Else {
-        $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+        $id = $global:tvdbid
         $entrytemp = $null
 
-        foreach ($id in $ids) {
-            if ($id) {
-                $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
-                if ($entrytemp -and $entrytemp.tvposter) {
-                    foreach ($lang in $global:PreferredLanguageOrderFanart) {
-                        if (($entrytemp.tvposter | Where-Object lang -eq "$lang")) {
-                            $global:posterurl = ($entrytemp.tvposter)[0].url
-                            if ($lang -eq '00') {
-                                Write-Entry -Subtext "Found Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                            }
-                            Else {
-                                Write-Entry -Subtext "Found Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                            }
-                            if ($lang -ne '00') {
-                                $global:PosterWithText = $true
-                                $global:FANARTAssetTextLang = $lang
-                            }
-                            break
+        if ($id) {
+            $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
+            if ($entrytemp -and $entrytemp.tvposter) {
+                foreach ($lang in $global:PreferredSeasonLanguageOrderFanart) {
+                    if (($entrytemp.tvposter | Where-Object lang -eq "$lang")) {
+                        $global:posterurl = ($entrytemp.tvposter)[0].url
+                        if ($lang -eq '00') {
+                            Write-Entry -Subtext "Found Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
                         }
+                        Else {
+                            Write-Entry -Subtext "Found Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                        }
+                        if ($lang -ne '00') {
+                            $global:PosterWithText = $true
+                            $global:FANARTAssetTextLang = $lang
+                        }
+                        continue
                     }
                 }
             }
@@ -1149,33 +1172,31 @@ function GetFanartShowPoster {
 function GetFanartShowBackground {
     $global:Fallback = $null
     Write-Entry -Subtext "Searching on Fanart.tv for a Background poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
-    $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+    $id = $global:tvdbid
     $entrytemp = $null
 
-    foreach ($id in $ids) {
-        if ($id) {
-            $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
-            if ($entrytemp -and $entrytemp.showbackground) {
-                if (!($entrytemp.showbackground | Where-Object lang -eq '')) {
-                    $global:posterurl = ($entrytemp.showbackground)[0].url
-                    Write-Entry -Subtext "Found Background with text on Fanart.tv"  -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                    $global:PosterWithText = $true
-                    $global:FANARTAssetTextLang = ($entrytemp.showbackground)[0].lang
-                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+    if ($id) {
+        $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
+        if ($entrytemp -and $entrytemp.showbackground) {
+            if (!($entrytemp.showbackground | Where-Object lang -eq '')) {
+                $global:posterurl = ($entrytemp.showbackground)[0].url
+                Write-Entry -Subtext "Found Background with text on Fanart.tv"  -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                $global:PosterWithText = $true
+                $global:FANARTAssetTextLang = ($entrytemp.showbackground)[0].lang
+                $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
 
-                    if ($global:FavProvider -eq 'FANART') {
-                        $global:Fallback = "TMDB"
-                        $global:fanartfallbackposterurl = ($entrytemp.showbackground)[0].url
-                    }
-                    break
+                if ($global:FavProvider -eq 'FANART') {
+                    $global:Fallback = "TMDB"
+                    $global:fanartfallbackposterurl = ($entrytemp.showbackground)[0].url
                 }
-                Else {
-                    $global:posterurl = ($entrytemp.showbackground | Where-Object lang -eq '')[0].url
-                    Write-Entry -Subtext "Found Textless background on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
-                    $global:TextlessPoster = $true
-                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                    break
-                }
+                continue
+            }
+            Else {
+                $global:posterurl = ($entrytemp.showbackground | Where-Object lang -eq '')[0].url
+                Write-Entry -Subtext "Found Textless background on Fanart.tv" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
+                $global:TextlessPoster = $true
+                $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                continue
             }
         }
     }
@@ -1191,81 +1212,88 @@ function GetFanartShowBackground {
 }
 function GetFanartSeasonPoster {
     Write-Entry -Subtext "Searching on Fanart.tv for Season '$global:SeasonNumber' poster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Info
-    $ids = @($global:tmdbid, $global:tvdbid, $global:imdbid)
+    $id = $global:tvdbid
     $entrytemp = $null
-    if ($global:PreferTextless -eq 'True') {
-        foreach ($id in $ids) {
-            if ($id) {
-                $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
-                if ($entrytemp.seasonposter) {
-                    if ($global:SeasonNumber -match '\b\d{1,2}\b') {
-                        $NoLangPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq '00' -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
-                        if ($NoLangPoster) {
-                            $global:posterurl = ($NoLangPoster | Sort-Object likes)[0].url
-                            Write-Entry -Subtext "Found Season Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                            $global:TextlessPoster = $true
-                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+    if ($global:SeasonPreferTextless -eq 'True') {
+        if ($id) {
+            $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
+            if ($entrytemp.seasonposter) {
+                if ($global:SeasonNumber -match '\b\d{1,2}\b') {
+                    $NoLangPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq '00' -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
+                    if ($NoLangPoster) {
+                        $global:posterurl = ($NoLangPoster | Sort-Object likes)[0].url
+                        Write-Entry -Subtext "Found Season Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                        $global:TextlessPoster = $true
+                        $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                        Write-Entry -Subtext "NoLangPoster: $NoLangPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "TextlessPoster: $global:TextlessPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                        Write-Entry -Subtext "FANARTAssetChangeUrl: $global:FANARTAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                    }
+                    Else {
+                        if (!$global:SeasonOnlyTextless) {
+                            Write-Entry -Subtext "No Texless Season Poster on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                            foreach ($lang in $global:PreferredSeasonLanguageOrderFanart) {
+                                $FoundPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq "$lang" -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
+                                if ($FoundPoster) {
+                                    $global:posterurl = $FoundPoster[0].url
+                                    Write-Entry -Subtext "Found season Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                                    $global:PosterWithText = $true
+                                    $global:FANARTAssetTextLang = $lang
+                                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                                    Write-Entry -Subtext "FoundPoster: $FoundPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    Write-Entry -Subtext "PosterWithText: $global:PosterWithText" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    Write-Entry -Subtext "FANARTAssetTextLang: $global:FANARTAssetTextLang" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    Write-Entry -Subtext "FANARTAssetChangeUrl: $global:FANARTAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    continue
+                                }
+                            }
                         }
                         Else {
-                            if (!$global:OnlyTextless) {
-                                Write-Entry -Subtext "No Texless Season Poster on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                                foreach ($lang in $global:PreferredLanguageOrderFanart) {
-                                    $FoundPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq "$lang" -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
-                                    if ($FoundPoster) {
-                                        $global:posterurl = $FoundPoster[0].url
-                                        Write-Entry -Subtext "Found season Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                            Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
+                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                        }
+                    }
+                }
+                Else {
+                    Write-Entry -Subtext "Could not get a result with '$global:SeasonNumber' on Fanart, likely season number not in correct format, fallback to Show poster." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                    if ($entrytemp -and $entrytemp.tvposter) {
+                        foreach ($lang in $global:PreferredSeasonLanguageOrderFanart) {
+                            if (($entrytemp.tvposter | Where-Object lang -eq "$lang")) {
+                                $global:posterurl = ($entrytemp.tvposter)[0].url
+                                if ($lang -eq '00') {
+                                    Write-Entry -Subtext "Found Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                                    $global:TextlessPoster = $true
+                                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                                }
+                                Else {
+                                    if (!$global:SeasonOnlyTextless) {
+                                        Write-Entry -Subtext "Found Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                                    }
+                                }
+                                if (!$global:SeasonOnlyTextless -and !$global:TextlessPoster) {
+                                    if ($lang -ne '00') {
                                         $global:PosterWithText = $true
                                         $global:FANARTAssetTextLang = $lang
                                         $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                                        break
                                     }
                                 }
-                            }
-                            Else {
-                                Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
-                                $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                                Else {
+                                    Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
+                                    $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                                    $global:posterurl = $null
+                                }
+                                continue
                             }
                         }
                     }
-                    Else {
-                        Write-Entry -Subtext "Could not get a result with '$global:SeasonNumber' on Fanart, likely season number not in correct format, fallback to Show poster." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                        if ($entrytemp -and $entrytemp.tvposter) {
-                            foreach ($lang in $global:PreferredLanguageOrderFanart) {
-                                if (($entrytemp.tvposter | Where-Object lang -eq "$lang")) {
-                                    $global:posterurl = ($entrytemp.tvposter)[0].url
-                                    if ($lang -eq '00') {
-                                        Write-Entry -Subtext "Found Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                                        $global:TextlessPoster = $true
-                                        $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                                    }
-                                    Else {
-                                        if (!$global:OnlyTextless) {
-                                            Write-Entry -Subtext "Found Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                                        }
-                                    }
-                                    if (!$global:OnlyTextless -and !$global:TextlessPoster) {
-                                        if ($lang -ne '00') {
-                                            $global:PosterWithText = $true
-                                            $global:FANARTAssetTextLang = $lang
-                                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                                        }
-                                    }
-                                    Else {
-                                        Write-Entry -Subtext "Found Poster with text on FANART, skipping because you only want textless..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Info
-                                        $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                                        $global:posterurl = $null
-                                    }
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    break
                 }
-                Else {
-                    $global:posterurl = $null
-                    break
-                }
+                continue
+            }
+            Else {
+                $global:posterurl = $null
+                continue
             }
         }
         if ($global:posterurl) {
@@ -1277,35 +1305,33 @@ function GetFanartSeasonPoster {
         }
     }
     Else {
-        foreach ($id in $ids) {
-            if ($id) {
-                $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
-                if ($entrytemp.seasonposter) {
-                    foreach ($lang in $global:PreferredLanguageOrderFanart) {
-                        $FoundPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq "$lang" -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
-                        if ($FoundPoster) {
-                            $global:posterurl = $FoundPoster[0].url
+        if ($id) {
+            $entrytemp = Get-FanartTv -Type tv -id $id -ErrorAction SilentlyContinue
+            if ($entrytemp.seasonposter) {
+                foreach ($lang in $global:PreferredSeasonLanguageOrderFanart) {
+                    $FoundPoster = ($entrytemp.seasonposter | Where-Object { $_.lang -eq "$lang" -and $_.Season -eq $global:SeasonNumber } | Sort-Object likes)
+                    if ($FoundPoster) {
+                        $global:posterurl = $FoundPoster[0].url
+                    }
+                    if ($global:posterurl) {
+                        if ($lang -eq '00') {
+                            Write-Entry -Subtext "Found season Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                            $global:TextlessPoster = $true
+                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
                         }
-                        if ($global:posterurl) {
-                            if ($lang -eq '00') {
-                                Write-Entry -Subtext "Found season Poster without Language on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                                $global:TextlessPoster = $true
-                                $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                            }
-                            Else {
-                                Write-Entry -Subtext "Found season Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
-                                $global:PosterWithText = $true
-                                $global:FANARTAssetTextLang = $lang
-                                $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
-                                break
-                            }
+                        Else {
+                            Write-Entry -Subtext "Found season Poster with Language '$lang' on FANART" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Blue -log Info
+                            $global:PosterWithText = $true
+                            $global:FANARTAssetTextLang = $lang
+                            $global:FANARTAssetChangeUrl = "https://fanart.tv/series/$id"
+                            continue
                         }
                     }
                 }
-                Else {
-                    $global:posterurl = $null
-                    break
-                }
+            }
+            Else {
+                $global:posterurl = $null
+                continue
             }
         }
         if ($global:posterurl) {
@@ -1361,7 +1387,7 @@ function GetTVDBMoviePoster {
                                     }
                                     return $global:posterurl
                                     $global:TVDBAssetChangeUrl = "https://thetvdb.com/movies/$($response.data.slug)#artwork"
-                                    break
+                                    continue
                                 }
                             }
                         }
@@ -1414,7 +1440,7 @@ function GetTVDBMoviePoster {
                             }
                             return $global:posterurl
                             $global:TVDBAssetChangeUrl = "https://thetvdb.com/movies/$($response.data.slug)#artwork"
-                            break
+                            continue
                         }
                     }
                 }
@@ -1492,7 +1518,7 @@ function GetTVDBMovieBackground {
                             }
                             return $global:posterurl
                             $global:TVDBAssetChangeUrl = "https://thetvdb.com/movies/$($response.data.slug)#artwork"
-                            break
+                            continue
                         }
                     }
                     if (!$global:posterurl) {
@@ -1589,7 +1615,7 @@ function GetTVDBShowPoster {
                             }
                             return $global:posterurl
                             $global:TVDBAssetChangeUrl = "https://thetvdb.com/series/$($response.data.slug)#artwork"
-                            break
+                            continue
                         }
                     }
                 }
@@ -1632,7 +1658,7 @@ function GetTVDBSeasonPoster {
                     $errorCount++
                 }
                 if ($Seasonresponse) {
-                    foreach ($lang in $global:PreferredLanguageOrderTVDB) {
+                    foreach ($lang in $global:PreferredSeasonLanguageOrderTVDB) {
                         if ($lang -eq 'null') {
                             $LangArtwork = ($Seasonresponse.data.artwork | Where-Object { $_.language -like "" -and $_.type -eq '7' } | Sort-Object Score -Descending)
                         }
@@ -1653,9 +1679,14 @@ function GetTVDBSeasonPoster {
                                 $global:TVDBAssetTextLang = $lang
                             }
                             $global:TVDBAssetChangeUrl = "https://thetvdb.com/series/$($response.data.slug)/seasons/$($Seasonresponse.data.type.type)/$global:SeasonNumber#artwork"
-
+                            Write-Entry -Subtext "LangArtwork: $LangArtwork" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                            Write-Entry -Subtext "PosterUrl: $global:posterurl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                            Write-Entry -Subtext "TextlessPoster: $global:TextlessPoster" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                            Write-Entry -Subtext "PosterWithText: $global:PosterWithText" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                            Write-Entry -Subtext "TVDBAssetTextLang: $global:TVDBAssetTextLang" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                            Write-Entry -Subtext "TVDBAssetChangeUrl: $global:TVDBAssetChangeUrl" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             return $global:posterurl
-                            break
+                            continue
                         }
                     }
                 }
@@ -1750,7 +1781,7 @@ function GetTVDBShowBackground {
                             $global:TVDBAssetChangeUrl = "https://thetvdb.com/series/$($response.data.slug)/#artwork"
 
                             return $global:posterurl
-                            break
+                            continue
                         }
                     }
                     if (!$global:posterurl) {
@@ -1839,22 +1870,22 @@ function GetPlexArtwork {
         Write-Entry -Subtext "Could not download Artwork from plex, Error Message: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
         Write-Entry -Subtext "[ERROR-HERE] See above. ^^^" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
         $errorCount++
-        break
+        continue
     }
 
     $magickcommand = "& `"$magick`" identify -verbose `"$TempImage`""
     $magickcommand | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
 
     # Execute command and get exif data
-    $value = (Invoke-Expression $magickcommand | Select-String -Pattern 'overlay|titlecard|created with ppm')
+    $value = (Invoke-Expression $magickcommand | Select-String -Pattern 'overlay|titlecard|created with ppm|created with posterizarr')
 
     if ($value) {
         $ExifFound = $True
-        Write-Entry -Subtext "Artwork has exif data from ppm/pmm/tcm, cant take it..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
+        Write-Entry -Subtext "Artwork has exif data from posterizarr/pmm/tcm, cant take it..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
         Remove-Item -LiteralPath $TempImage | out-null
     }
     Else {
-        Write-Entry -Subtext "No ppm/pmm/tcm exif data found, taking Plex artwork..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
+        Write-Entry -Subtext "No posterizarr/pmm/tcm exif data found, taking Plex artwork..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
         $global:PlexartworkDownloaded = $true
         $global:posterurl = $ArtUrl
     }
@@ -1920,7 +1951,7 @@ function CheckJson {
                         Write-Entry -Message "Missing Main Attribute in your Config file: $partKey." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
                         Write-Entry -Subtext "I will copy all settings from 'PosterOverlayPart'..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
                         Write-Entry -Subtext "Adding it for you... In GH Readme, look for $partKey - if you want to see what changed..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                        Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Plex-Poster-Maker/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+                        Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Posterizarr/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
                         # Convert the updated configuration object back to JSON and save it, then reload it
                         $configJson = $config | ConvertTo-Json -Depth 10
                         $configJson | Set-Content -Path $jsonFilePath -Force
@@ -1929,7 +1960,7 @@ function CheckJson {
                     Else {
                         Write-Entry -Message "Missing Main Attribute in your Config file: $partKey." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
                         Write-Entry -Subtext "Adding it for you... In GH Readme, look for $partKey - if you want to see what changed..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                        Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Plex-Poster-Maker/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+                        Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Posterizarr/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
                         $config | Add-Member -MemberType NoteProperty -Name $partKey -Value $defaultConfig.$partKey
                         $AttributeChanged = $True
                     }
@@ -1949,7 +1980,7 @@ function CheckJson {
                         if (-not $config.$partKey.PSObject.Properties.Name.tolower().Contains($propertyKey.tolower())) {
                             Write-Entry -Message "Missing Sub-Attribute in your Config file: $partKey.$propertyKey" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
                             Write-Entry -Subtext "Adding it for you... In GH Readme, look for $partKey.$propertyKey - if you want to see what changed..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                            Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Plex-Poster-Maker/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
+                            Write-Entry -Subtext "GH Readme -> https://github.com/fscorrupt/Posterizarr/blob/main/README.md#configuration" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
                             # Add the property using the expected casing
                             $config.$partKey | Add-Member -MemberType NoteProperty -Name $propertyKey -Value $defaultConfig.$partKey.$propertyKey -Force
                             $AttributeChanged = $True
@@ -2007,7 +2038,6 @@ function CheckJsonPaths {
         Exit
     }
 }
-
 function Get-Platform {
     if ($global:OSType -eq 'DockerAlpine') {
         return 'Docker'
@@ -2022,17 +2052,15 @@ function Get-Platform {
         return 'Unknown'
     }
 }
-
 function Get-LatestScriptVersion {
     try {
-        return Invoke-RestMethod -Uri "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/Release.txt" -Method Get -ErrorAction Stop
+        return Invoke-RestMethod -Uri "https://github.com/fscorrupt/Posterizarr/raw/main/Release.txt" -Method Get -ErrorAction Stop
     }
     catch {
         Write-Entry -Subtext "Could not query latest script version, Error: $($_.Exception.Message)" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log Error
         return $null
     }
 }
-
 function RotateLogs {
     param (
         [string]$ScriptRoot
@@ -2060,7 +2088,6 @@ function RotateLogs {
         Move-Item -Path "$logFolder`_$timestamp" $RotationFolder
     }
 }
-
 function CheckConfigFile {
     param (
         [string]$ScriptRoot
@@ -2068,13 +2095,12 @@ function CheckConfigFile {
 
     if (!(Test-Path (Join-Path $ScriptRoot 'config.json'))) {
         Write-Entry -Message "Config File missing, downloading it for you..." -Path "$ScriptRoot\Logs\Scriptlog.log" -Color White -log Info
-        Invoke-WebRequest -Uri "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/config.example.json" -OutFile "$ScriptRoot\config.json"
+        Invoke-WebRequest -Uri "https://github.com/fscorrupt/Posterizarr/raw/main/config.example.json" -OutFile "$ScriptRoot\config.json"
         Write-Entry -Subtext "Config File downloaded here: '$ScriptRoot\config.json'" -Path "$ScriptRoot\Logs\Scriptlog.log" -Color White -log Info
         Write-Entry -Subtext "Please configure the config file according to GitHub, Exit script now..." -Path "$ScriptRoot\Logs\Scriptlog.log" -Color Yellow -log Warning
         Exit
     }
 }
-
 function Test-And-Download {
     param(
         [string]$url,
@@ -2085,7 +2111,6 @@ function Test-And-Download {
         Invoke-WebRequest -Uri $url -OutFile $destination
     }
 }
-
 function RedactPlexUrl {
     param(
         [string]$url
@@ -2128,6 +2153,7 @@ function LogConfigSettings {
     }
     Write-Entry -Subtext "| Fav Provider:                 $global:FavProvider" -Path $configLogging -Color White -log Info
     Write-Entry -Subtext "| Preferred Lang Order:         $($global:PreferredLanguageOrder -join ',')" -Path $configLogging -Color White -log Info
+    Write-Entry -Subtext "| Preferred Season Lang Order:  $($global:PreferredSeasonLanguageOrder -join ',')" -Path $configLogging -Color White -log Info
     Write-Entry -Subtext "Plex Part" -Path $configLogging -Color Cyan -log Info
     Write-Entry -Subtext "| Excluded Libs:                $($LibstoExclude -join ',')" -Path $configLogging -Color White -log Info
     Write-Entry -Subtext "| Plex Url:                     $($PlexUrl[0..10] -join '')****" -Path $configLogging -Color White -log Info
@@ -2205,7 +2231,6 @@ function LogConfigSettings {
     Write-Entry -Subtext "| Text Box Offset:              $TitleCardEPtext_offset" -Path $configLogging -Color White -log Info
     Write-Entry -Subtext "___________________________________________" -Path $configLogging -Color DarkMagenta -log Info
 }
-
 function CheckPlexAccess {
     param (
         [string]$PlexUrl,
@@ -2269,8 +2294,6 @@ function CheckPlexAccess {
         }
     }
 }
-
-
 function CheckImageMagick {
     param (
         [string]$magick,
@@ -2309,7 +2332,6 @@ function CheckImageMagick {
         }
     }
 }
-
 function CheckOverlayDimensions {
     param (
         [string]$Posteroverlay,
@@ -2348,7 +2370,6 @@ function CheckOverlayDimensions {
         Write-Entry -Subtext "TitleCard overlay is NOT correctly sized at: $BackgroundSize. Actual dimensions: $Titlecardoverlaydimensions" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
     }
 }
-
 function InvokeMagickCommand {
     param (
         [string]$Command,
@@ -2388,7 +2409,6 @@ function InvokeMagickCommand {
         Write-Entry -Subtext (GetMagickErrorMessage $errorOutput) -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Red -log info
     }
 }
-
 function CheckCharLimit {
     # Attempt to get the registry key
     try {
@@ -2429,7 +2449,7 @@ Write-Entry -Message "Starting..." -Path $global:ScriptRoot\Logs\Scriptlog.log -
 # Check if Config file is present
 CheckConfigFile -ScriptRoot $global:ScriptRoot
 # Test Json if something is missing
-CheckJson -jsonExampleUrl "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/config.example.json" -jsonFilePath $(Join-Path $global:ScriptRoot 'config.json')
+CheckJson -jsonExampleUrl "https://github.com/fscorrupt/Posterizarr/raw/main/config.example.json" -jsonFilePath $(Join-Path $global:ScriptRoot 'config.json')
 # Check if Script is Latest
 if ($CurrentScriptVersion -eq $LatestScriptVersion) {
     Write-Entry -Message "You are Running Version - v$CurrentScriptVersion" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Green -log Info
@@ -2513,23 +2533,46 @@ $FanartTvAPIKey = $config.ApiPart.FanartTvAPIKey
 $PlexToken = $config.ApiPart.PlexToken
 $global:FavProvider = $config.ApiPart.FavProvider.ToUpper()
 $global:PreferredLanguageOrder = $config.ApiPart.PreferredLanguageOrder
-# default Lang order if missing in config
+$global:PreferredSeasonLanguageOrder = $config.ApiPart.PreferredSeasonLanguageOrder
+
+# Poster Lang Settings
 if (!$global:PreferredLanguageOrder) {
-    Write-Entry -Message "Lang search Order not set in Config, setting it to 'xx,en,de' for you" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
+    Write-Entry -Message "Poster Lang search Order not set in Config, setting it to 'xx,en,de' for you" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
     $global:PreferredLanguageOrder = "xx", "en", "de"
 }
 $global:PreferredLanguageOrderTMDB = $global:PreferredLanguageOrder.Replace('xx', 'null')
 $global:PreferredLanguageOrderFanart = $global:PreferredLanguageOrder.Replace('xx', '00')
 $global:PreferredLanguageOrderTVDB = $global:PreferredLanguageOrder.Replace('xx', 'null')
-if ($global:PreferredLanguageOrder[0] -eq 'xx' -or $global:PreferredLanguageOrder -eq 'xx') {
+if ($global:PreferredLanguageOrder.count -eq '1' -and $global:PreferredLanguageOrder -eq 'xx'){
     $global:PreferTextless = $true
-    if ( $PreferredLanguageOrder.count -eq "1") {
-        $global:OnlyTextless = $true
-    }
+    $global:OnlyTextless = $true
+}
+Elseif ($global:PreferredLanguageOrder[0] -eq 'xx') {
+    $global:PreferTextless = $true
 }
 Else {
     $global:PreferTextless = $false
 }
+
+# Season Lang Settings
+if (!$global:PreferredSeasonLanguageOrder) {
+    Write-Entry -Message "Season Lang search Order not set in Config, setting it to 'xx,en,de' for you" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
+    $global:PreferredSeasonLanguageOrder = "xx", "en", "de"
+}
+$global:PreferredSeasonLanguageOrderTMDB = $global:PreferredSeasonLanguageOrder.Replace('xx', 'null')
+$global:PreferredSeasonLanguageOrderFanart = $global:PreferredSeasonLanguageOrder.Replace('xx', '00')
+$global:PreferredSeasonLanguageOrderTVDB = $global:PreferredSeasonLanguageOrder.Replace('xx', 'null')
+if ($global:PreferredSeasonLanguageOrder.count -eq '1' -and $global:PreferredSeasonLanguageOrder -eq 'xx'){
+    $global:SeasonPreferTextless = $true
+    $global:SeasonOnlyTextless = $true
+}
+Elseif ($global:PreferredSeasonLanguageOrder[0] -eq 'xx') {
+    $global:SeasonPreferTextless = $true
+}
+Else {
+    $global:SeasonPreferTextless = $false
+}
+
 # default to TMDB if favprovider missing
 if (!$global:FavProvider) {
     Write-Entry -Message "FavProvider not set in config, setting it to 'TMDB' for you" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
@@ -2721,9 +2764,9 @@ if ($Testing) {
 }
 
 # Test and download files if they don't exist
-Test-And-Download -url "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/overlay.png" -destination (Join-Path $TempPath 'overlay.png')
-Test-And-Download -url "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/backgroundoverlay.png" -destination (Join-Path $TempPath 'backgroundoverlay.png')
-Test-And-Download -url "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/Rocky.ttf" -destination (Join-Path $TempPath 'Rocky.ttf')
+Test-And-Download -url "https://github.com/fscorrupt/Posterizarr/raw/main/overlay.png" -destination (Join-Path $TempPath 'overlay.png')
+Test-And-Download -url "https://github.com/fscorrupt/Posterizarr/raw/main/backgroundoverlay.png" -destination (Join-Path $TempPath 'backgroundoverlay.png')
+Test-And-Download -url "https://github.com/fscorrupt/Posterizarr/raw/main/Rocky.ttf" -destination (Join-Path $TempPath 'Rocky.ttf')
 
 # Write log message
 Write-Entry -Message "Old log files cleared..." -Path $configLogging -Color White -log Info
@@ -2875,7 +2918,7 @@ if ($Manual) {
         Move-Item -LiteralPath $PicturePath -destination $PosterImage -Force -ErrorAction SilentlyContinue
         Write-Entry -Subtext "Processing Poster for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Manuallog.log -Color White -log Info
 
-        $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with ppm`" `"$PosterImage`""
+        $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with posterizarr`" `"$PosterImage`""
         $CommentlogEntry = "`"$magick`" $CommentArguments"
         $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
         InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -3767,16 +3810,16 @@ Elseif ($Testing) {
     if ($global:NotifyUrl -and $env:POWERSHELL_DISTRIBUTION_CHANNEL -notlike 'PSDocker-Alpine*') {
         $jsonPayload = @"
         {
-            "username": "Plex-Poster-Maker",
-            "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+            "username": "Posterizarr",
+            "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
             "content": "",
             "embeds": [
             {
                 "author": {
-                "name": "PPM @Github",
-                "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+                "name": "Posterizarr @Github",
+                "url": "https://github.com/fscorrupt/Posterizarr"
                 },
-                "description": "PPM Test run took: $FormattedTimespawn",
+                "description": "Test run took: $FormattedTimespawn",
                 "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
                 "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                 "fields": [
@@ -3812,7 +3855,7 @@ Elseif ($Testing) {
                 }
                 ],
                 "thumbnail": {
-                    "url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png"
+                    "url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png"
                 },
                 "footer": {
                     "text": "$Platform  | current - v$CurrentScriptVersion  | latest - v$LatestScriptVersion"
@@ -3830,16 +3873,16 @@ Elseif ($Testing) {
         if ($global:NotifyUrl -like '*discord*') {
             $jsonPayload = @"
             {
-                "username": "Plex-Poster-Maker",
-                "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+                "username": "Posterizarr",
+                "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
                 "content": "",
                 "embeds": [
                 {
                     "author": {
-                    "name": "PPM @Github",
-                    "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+                    "name": "Posterizarr @Github",
+                    "url": "https://github.com/fscorrupt/Posterizarr"
                     },
-                    "description": "PPM Test run took: $FormattedTimespawn",
+                    "description": "Test run took: $FormattedTimespawn",
                     "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
                     "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                     "fields": [
@@ -3875,7 +3918,7 @@ Elseif ($Testing) {
                     }
                     ],
                     "thumbnail": {
-                        "url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png"
+                        "url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png"
                     },
                     "footer": {
                         "text": "$Platform  | current - v$CurrentScriptVersion  | latest - v$LatestScriptVersion"
@@ -3893,10 +3936,10 @@ Elseif ($Testing) {
         Else {
             if ($global:SendNotification -eq 'True') {
                 if ($TruncatedCount -ge '1') {
-                    apprise --notification-type="error" --title="Plex-Poster-Maker" --body="PPM test run took: $FormattedTimespawn`nDuring execution '$TruncatedCount' times the text got truncated, please check log for detailed description." "$global:NotifyUrl"
+                    apprise --notification-type="error" --title="Posterizarr" --body="Test run took: $FormattedTimespawn`nDuring execution '$TruncatedCount' times the text got truncated, please check log for detailed description." "$global:NotifyUrl"
                 }
                 Else {
-                    apprise --notification-type="success" --title="Plex-Poster-Maker" --body="PPM test run took: $FormattedTimespawn" "$global:NotifyUrl"
+                    apprise --notification-type="success" --title="Posterizarr" --body="Test run took: $FormattedTimespawn" "$global:NotifyUrl"
                 }
             }
         }
@@ -3971,7 +4014,7 @@ Elseif ($Tautulli) {
                     }
                     Write-Entry -Subtext "Matchedpath: $Matchedpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                     Write-Entry -Subtext "ExtractedFolder: $extractedFolder" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
-                    break
+                    continue
                 }
             }
         }
@@ -4015,7 +4058,7 @@ Elseif ($Tautulli) {
                     }
                     Write-Entry -Subtext "Matchedpath: $Matchedpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                     Write-Entry -Subtext "ExtractedFolder: $extractedFolder" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
-                    break
+                    continue
                 }
             }
         }
@@ -4283,7 +4326,7 @@ Elseif ($Tautulli) {
                             }
                         }
 
-                        if ($global:OnlyTextless) {
+                        if ($global:OnlyTextless -and !$global:posterurl) {
                             $global:posterurl = GetFanartMoviePoster
                             if (!$global:FavProvider -eq 'FANART') {
                                 $global:IsFallback = $true
@@ -4364,7 +4407,7 @@ Elseif ($Tautulli) {
                             }
                             if ($global:ImageProcessing -eq 'true') {
                                 Write-Entry -Subtext "Processing Poster for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                                $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with ppm`" `"$PosterImage`""
+                                $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with posterizarr`" `"$PosterImage`""
                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -4650,7 +4693,7 @@ Elseif ($Tautulli) {
                             }
                             if ($global:ImageProcessing -eq 'true') {
                                 Write-Entry -Subtext "Processing background for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                                $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with ppm`" `"$backgroundImage`""
+                                $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with posterizarr`" `"$backgroundImage`""
                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -5022,7 +5065,7 @@ Elseif ($Tautulli) {
                         }
                         if ($global:ImageProcessing -eq 'true') {
                             Write-Entry -Subtext "Processing Poster for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                            $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with ppm`" `"$PosterImage`""
+                            $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with posterizarr`" `"$PosterImage`""
                             $CommentlogEntry = "`"$magick`" $CommentArguments"
                             $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                             InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -5315,7 +5358,7 @@ Elseif ($Tautulli) {
                         }
                         if ($global:ImageProcessing -eq 'true') {
                             Write-Entry -Subtext "Processing background for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                            $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with ppm`" `"$backgroundImage`""
+                            $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with posterizarr`" `"$backgroundImage`""
                             $CommentlogEntry = "`"$magick`" $CommentArguments"
                             $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                             InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -5534,22 +5577,31 @@ Elseif ($Tautulli) {
                         # do a specific order
                         if ($entry.tmdbid) {
                             $global:posterurl = GetTMDBSeasonPoster
+                            Write-Entry -Message "Function GetTMDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             if (!$global:posterurl) {
                                 $global:posterurl = GetFanartSeasonPoster
+                                Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
-                            if ($global:posterurl -and $global:PreferTextless -eq 'True' -and !$global:TextlessPoster) {
+                            if ($global:posterurl -and $global:SeasonPreferTextless -eq 'True' -and !$global:TextlessPoster) {
                                 $global:posterurl = GetFanartSeasonPoster
+                                Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
                             if ((!$global:posterurl -or !$global:TextlessPoster) -and $entry.tvdbid) {
                                 $global:IsFallback = $true
                                 $global:posterurl = GetTVDBSeasonPoster
+                                Write-Entry -Message "Function GetTVDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
                             if (!$global:posterurl) {
                                 $global:IsFallback = $true
-                                if ($entry.PlexSeasonUrl -and !$global:OnlyTextless) {
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                if ($entry.PlexSeasonUrl -and !$global:SeasonOnlyTextless) {
                                     GetPlexArtwork -Type ' a Season Poster' -ArtUrl $Arturl -TempImage $SeasonImage
+                                    Write-Entry -Message "Function GetPlexArtwork called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 }
                                 Else {
                                     Write-Entry -Subtext "Plex Season Poster Url empty, cannot search on plex, likely there is no artwork on plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
@@ -5562,15 +5614,20 @@ Elseif ($Tautulli) {
                         Else {
                             Write-Entry -Subtext "Can't search on TMDB, missing ID..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
                             $global:posterurl = GetFanartSeasonPoster
+                            Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             if (!$global:posterurl) {
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 if ($entry.tvdbid) {
                                     $global:posterurl = GetTVDBSeasonPoster
+                                    Write-Entry -Message "Function GetTVDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 }
                                 if (!$global:posterurl) {
                                     $global:IsFallback = $true
-                                    if ($entry.PlexSeasonUrl -and !$global:OnlyTextless) {
+                                    Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    if ($entry.PlexSeasonUrl -and !$global:SeasonOnlyTextless) {
                                         GetPlexArtwork -Type ' a Season Poster' -ArtUrl $Arturl -TempImage $SeasonImage
+                                        Write-Entry -Message "Function GetPlexArtwork called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                     }
                                     Else {
                                         Write-Entry -Subtext "Plex Season Poster Url empty, cannot search on plex, likely there is no artwork on plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
@@ -5635,7 +5692,7 @@ Elseif ($Tautulli) {
                                     }
                                 }
                                 if (Get-ChildItem -LiteralPath $SeasonImage -ErrorAction SilentlyContinue) {
-                                    $CommentArguments = "convert `"$SeasonImage`" -set `"comment`" `"created with ppm`" `"$SeasonImage`""
+                                    $CommentArguments = "convert `"$SeasonImage`" -set `"comment`" `"created with posterizarr`" `"$SeasonImage`""
                                     $CommentlogEntry = "`"$magick`" $CommentArguments"
                                     $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                     InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -6053,7 +6110,7 @@ Elseif ($Tautulli) {
                                             }
                                             Else {
                                                 if (Get-ChildItem -LiteralPath $EpisodeImage -ErrorAction SilentlyContinue) {
-                                                    $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with ppm`" `"$EpisodeImage`""
+                                                    $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with posterizarr`" `"$EpisodeImage`""
                                                     $CommentlogEntry = "`"$magick`" $CommentArguments"
                                                     $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                                     InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -6206,7 +6263,7 @@ Elseif ($Tautulli) {
                                                 }
                                                 # Export the array to a CSV file
                                                 $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') +"|"+ $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
+                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') + " | " + $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
                                     }
@@ -6475,7 +6532,7 @@ Elseif ($Tautulli) {
                                                 }
                                             }
                                             if (Get-ChildItem -LiteralPath $EpisodeImage -ErrorAction SilentlyContinue) {
-                                                $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with ppm`" `"$EpisodeImage`""
+                                                $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with posterizarr`" `"$EpisodeImage`""
                                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -6628,7 +6685,7 @@ Elseif ($Tautulli) {
                                                 }
                                                 # Export the array to a CSV file
                                                 $episodetemp | Export-Csv -Path "$global:ScriptRoot\Logs\ImageChoices.csv" -NoTypeInformation -Delimiter ';' -Encoding UTF8 -Force -Append
-                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') +"|"+ $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
+                                                SendMessage -type $episodetemp.Type -title $($global:show_name.replace('"', '\"') + " | " + $episodetemp.Title.replace('"', '\"')) -Lib $episodetemp.LibraryName -DLSource $episodetemp.'Download Source' -lang $episodetemp.Language -favurl $episodetemp.'Fav Provider Link' -fallback $episodetemp.Fallback -Truncated $episodetemp.TextTruncated
                                             }
                                         }
                                     }
@@ -6881,7 +6938,7 @@ else {
                             }
                             Write-Entry -Subtext "Matchedpath: $Matchedpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             Write-Entry -Subtext "ExtractedFolder: $extractedFolder" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
-                            break
+                            continue
                         }
                     }
                 }
@@ -6925,7 +6982,7 @@ else {
                             }
                             Write-Entry -Subtext "Matchedpath: $Matchedpath" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             Write-Entry -Subtext "ExtractedFolder: $extractedFolder" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
-                            break
+                            continue
                         }
                     }
                 }
@@ -7106,7 +7163,6 @@ else {
             if ($($entry.RootFoldername)) {
                 $global:posterurl = $null
                 $global:ImageMagickError = $null
-                $global:TextlessPoster = $null
                 $global:TMDBfallbackposterurl = $null
                 $global:fanartfallbackposterurl = $null
                 $global:IsFallback = $null
@@ -7162,6 +7218,7 @@ else {
                         $global:tmdbid = $entry.tmdbid
                         $global:tvdbid = $entry.tvdbid
                         $global:imdbid = $entry.imdbid
+                        $global:TextlessPoster = $null
                         $global:posterurl = $null
                         $global:PosterWithText = $null
                         $global:AssetTextLang = $null
@@ -7205,7 +7262,7 @@ else {
                             }
                         }
 
-                        if ($global:OnlyTextless) {
+                        if ($global:OnlyTextless -and !$global:posterurl) {
                             $global:posterurl = GetFanartMoviePoster
                             if (!$global:FavProvider -eq 'FANART') {
                                 $global:IsFallback = $true
@@ -7286,7 +7343,7 @@ else {
                             }
                             if ($global:ImageProcessing -eq 'true') {
                                 Write-Entry -Subtext "Processing Poster for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                                $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with ppm`" `"$PosterImage`""
+                                $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with posterizarr`" `"$PosterImage`""
                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -7452,6 +7509,7 @@ else {
                         $global:FANARTAssetChangeUrl = $null
                         $global:TVDBAssetChangeUrl = $null
                         $global:ImageMagickError = $null
+                        $global:TextlessPoster = $null
                         if ($PlexToken) {
                             $Arturl = $plexurl + $entry.PlexBackgroundUrl + "?X-Plex-Token=$PlexToken"
                         }
@@ -7556,7 +7614,7 @@ else {
                             }
                             if ($global:ImageProcessing -eq 'true') {
                                 Write-Entry -Subtext "Processing background for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                                $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with ppm`" `"$backgroundImage`""
+                                $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with posterizarr`" `"$backgroundImage`""
                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -7912,7 +7970,7 @@ else {
                         }
                         if ($global:ImageProcessing -eq 'true') {
                             Write-Entry -Subtext "Processing Poster for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                            $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with ppm`" `"$PosterImage`""
+                            $CommentArguments = "convert `"$PosterImage`" -set `"comment`" `"created with posterizarr`" `"$PosterImage`""
                             $CommentlogEntry = "`"$magick`" $CommentArguments"
                             $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                             InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -8189,7 +8247,7 @@ else {
                         }
                         if ($global:ImageProcessing -eq 'true') {
                             Write-Entry -Subtext "Processing background for: `"$joinedTitle`"" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color White -log Info
-                            $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with ppm`" `"$backgroundImage`""
+                            $CommentArguments = "convert `"$backgroundImage`" -set `"comment`" `"created with posterizarr`" `"$backgroundImage`""
                             $CommentlogEntry = "`"$magick`" $CommentArguments"
                             $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                             InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -8390,22 +8448,31 @@ else {
                         # do a specific order
                         if ($entry.tmdbid) {
                             $global:posterurl = GetTMDBSeasonPoster
+                            Write-Entry -Message "Function GetTMDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             if (!$global:posterurl) {
                                 $global:posterurl = GetFanartSeasonPoster
+                                Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
-                            if ($global:posterurl -and $global:PreferTextless -eq 'True' -and !$global:TextlessPoster) {
+                            if ($global:posterurl -and $global:SeasonPreferTextless -eq 'True' -and !$global:TextlessPoster) {
                                 $global:posterurl = GetFanartSeasonPoster
+                                Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
                             if ((!$global:posterurl -or !$global:TextlessPoster) -and $entry.tvdbid) {
                                 $global:IsFallback = $true
                                 $global:posterurl = GetTVDBSeasonPoster
+                                Write-Entry -Message "Function GetTVDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             }
                             if (!$global:posterurl) {
                                 $global:IsFallback = $true
-                                if ($entry.PlexSeasonUrl -and !$global:OnlyTextless) {
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                if ($entry.PlexSeasonUrl -and !$global:SeasonOnlyTextless) {
                                     GetPlexArtwork -Type ' a Season Poster' -ArtUrl $Arturl -TempImage $SeasonImage
+                                    Write-Entry -Message "Function GetPlexArtwork called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 }
                                 Else {
                                     Write-Entry -Subtext "Plex Season Poster Url empty, cannot search on plex, likely there is no artwork on plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
@@ -8418,15 +8485,20 @@ else {
                         Else {
                             Write-Entry -Subtext "Can't search on TMDB, missing ID..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
                             $global:posterurl = GetFanartSeasonPoster
+                            Write-Entry -Message "Function GetFanartSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                             if (!$global:posterurl) {
                                 $global:IsFallback = $true
+                                Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 if ($entry.tvdbid) {
                                     $global:posterurl = GetTVDBSeasonPoster
+                                    Write-Entry -Message "Function GetTVDBSeasonPoster called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                 }
                                 if (!$global:posterurl) {
                                     $global:IsFallback = $true
-                                    if ($entry.PlexSeasonUrl -and !$global:OnlyTextless) {
+                                    Write-Entry -Message "IsFallback: $global:IsFallback" -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
+                                    if ($entry.PlexSeasonUrl -and !$global:SeasonOnlyTextless) {
                                         GetPlexArtwork -Type ' a Season Poster' -ArtUrl $Arturl -TempImage $SeasonImage
+                                        Write-Entry -Message "Function GetPlexArtwork called..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Cyan -log Debug
                                     }
                                     Else {
                                         Write-Entry -Subtext "Plex Season Poster Url empty, cannot search on plex, likely there is no artwork on plex..." -Path $global:ScriptRoot\Logs\Scriptlog.log -Color Yellow -log Warning
@@ -8491,7 +8563,7 @@ else {
                                     }
                                 }
                                 if (Get-ChildItem -LiteralPath $SeasonImage -ErrorAction SilentlyContinue) {
-                                    $CommentArguments = "convert `"$SeasonImage`" -set `"comment`" `"created with ppm`" `"$SeasonImage`""
+                                    $CommentArguments = "convert `"$SeasonImage`" -set `"comment`" `"created with posterizarr`" `"$SeasonImage`""
                                     $CommentlogEntry = "`"$magick`" $CommentArguments"
                                     $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                     InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -8891,7 +8963,7 @@ else {
                                             }
                                             Else {
                                                 if (Get-ChildItem -LiteralPath $EpisodeImage -ErrorAction SilentlyContinue) {
-                                                    $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with ppm`" `"$EpisodeImage`""
+                                                    $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with posterizarr`" `"$EpisodeImage`""
                                                     $CommentlogEntry = "`"$magick`" $CommentArguments"
                                                     $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                                     InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -9296,7 +9368,7 @@ else {
                                                 }
                                             }
                                             if (Get-ChildItem -LiteralPath $EpisodeImage -ErrorAction SilentlyContinue) {
-                                                $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with ppm`" `"$EpisodeImage`""
+                                                $CommentArguments = "convert `"$EpisodeImage`" -set `"comment`" `"created with posterizarr`" `"$EpisodeImage`""
                                                 $CommentlogEntry = "`"$magick`" $CommentArguments"
                                                 $CommentlogEntry | Out-File $global:ScriptRoot\Logs\ImageMagickCommands.log -Append
                                                 InvokeMagickCommand -Command $magick -Arguments $CommentArguments
@@ -9549,16 +9621,16 @@ else {
         if ($global:NotifyUrl -like '*discord*') {
             $jsonPayload = @"
         {
-            "username": "Plex-Poster-Maker",
-            "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+            "username": "Posterizarr",
+            "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
             "content": "",
             "embeds": [
             {
                 "author": {
-                "name": "PPM @Github",
-                "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+                "name": "Posterizarr @Github",
+                "url": "https://github.com/fscorrupt/Posterizarr"
                 },
-                "description": "PPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
+                "description": "Run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
                 "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
                 "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                 "fields": [
@@ -9619,7 +9691,7 @@ else {
                 }
                 ],
                 "thumbnail": {
-                    "url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png"
+                    "url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png"
                 },
                 "footer": {
                     "text": "$Platform  | current - v$CurrentScriptVersion  | latest - v$LatestScriptVersion"
@@ -9636,10 +9708,10 @@ else {
         Else {
             if ($global:SendNotification -eq 'True') {
                 if ($errorCount -ge '1') {
-                    apprise --notification-type="error" --title="Plex-Poster-Maker" --body="PPM run took: $FormattedTimespawn`nIt Created '$posterCount' Images`n`nDuring execution '$errorCount' Errors occurred, please check log for detailed description." "$global:NotifyUrl"
+                    apprise --notification-type="error" --title="Posterizarr" --body="Run took: $FormattedTimespawn`nIt Created '$posterCount' Images`n`nDuring execution '$errorCount' Errors occurred, please check log for detailed description." "$global:NotifyUrl"
                 }
                 Else {
-                    apprise --notification-type="success" --title="Plex-Poster-Maker" --body="PPM run took: $FormattedTimespawn`nIt Created '$posterCount' Images" "$global:NotifyUrl"
+                    apprise --notification-type="success" --title="Posterizarr" --body="Run took: $FormattedTimespawn`nIt Created '$posterCount' Images" "$global:NotifyUrl"
                 }
             }
         }
@@ -9647,16 +9719,16 @@ else {
     if ($global:NotifyUrl -and $env:POWERSHELL_DISTRIBUTION_CHANNEL -notlike 'PSDocker-Alpine*') {
         $jsonPayload = @"
         {
-            "username": "Plex-Poster-Maker",
-            "avatar_url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png",
+            "username": "Posterizarr",
+            "avatar_url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png",
             "content": "",
             "embeds": [
             {
                 "author": {
-                "name": "PPM @Github",
-                "url": "https://github.com/fscorrupt/Plex-Poster-Maker"
+                "name": "Posterizarr @Github",
+                "url": "https://github.com/fscorrupt/Posterizarr"
                 },
-                "description": "PPM run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
+                "description": "Run took: $FormattedTimespawn $(if ($errorCount -ge '1') {"\n During execution Errors occurred, please check log for detailed description."})",
                 "timestamp": "$(((Get-Date).ToUniversalTime()).ToString("yyyy-MM-ddTHH:mm:ss.fffZ"))",
                 "color": $(if ($errorCount -ge '1') {16711680}Elseif ($Testing){8388736}Elseif ($FallbackCount.count -gt '1' -or $PosterUnknownCount -ge '1' -or $TextTruncatedCount.count -gt '1'){15120384}Else{5763719}),
                 "fields": [
@@ -9717,7 +9789,7 @@ else {
                 }
                 ],
                 "thumbnail": {
-                    "url": "https://github.com/fscorrupt/Plex-Poster-Maker/raw/main/images/webhook.png"
+                    "url": "https://github.com/fscorrupt/Posterizarr/raw/main/images/webhook.png"
                 },
                 "footer": {
                     "text": "$Platform  | current - v$CurrentScriptVersion  | latest - v$LatestScriptVersion"
